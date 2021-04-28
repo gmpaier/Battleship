@@ -1,4 +1,5 @@
 const router = require('express').Router();
+
 const {  User, UserGame } = require('../models');
 const withAuth = require('../utils/auth');
 
@@ -57,3 +58,4 @@ router.get('/login', (req, res) => {
 });
 
 module.exports = router;
+
