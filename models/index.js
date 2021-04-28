@@ -3,7 +3,6 @@ const User = require('./User');
 const UserGame = require('./UserGame');
 const Friend = require('./Friend');
 const Board = require('./Board');
-const Row = require('./Row');
 const Ship = require('./Ship');
 
 Game.belongsToMany(User, {
@@ -45,27 +44,7 @@ User.hasMany(Board, {
 });
 
 Board.belongsTo(User, {
-  as: 'playerBoard',
   foreignKey: 'player_id'
-});
-
-User.hasMany(Board, {
-  foreignKey: 'opponent_id',
-  onDelete: 'CASCADE'
-});
-
-Board.belongsTo(User, {
-  as: 'opponentBoard',
-  foreignKey: 'opponent_id'
-});
-
-Board.hasMany(Row, {
-  foreignKey: 'board_id',
-  onDelete: 'CASCADE'
-});
-
-Row.belongsTo(Board, {
-  foreignKey: 'board_id'
 });
 
 Board.hasMany(Ship, {
@@ -77,21 +56,11 @@ Ship.belongsTo(Board, {
   foreignKey: 'board_id'
 });
 
-User.hasMany(Ship, {
-  foreignKey: 'user_id',
-  onDelete: 'CASCADE'
-});
-
-Ship.belongsTo(User, {
-  foreignKey: 'user_id'
-});
-
 module.exports = {
   Game, 
   User,
   UserGame,
   Friend,
   Board,
-  Row,
   Ship
 }

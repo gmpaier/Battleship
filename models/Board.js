@@ -11,12 +11,8 @@ Board.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    height: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    width: {
-      type: DataTypes.INTEGER,
+    state: {
+      type: DataTypes.STRING,
       allowNull: false
     },
     game_id: {
@@ -32,15 +28,7 @@ Board.init(
         model: 'user',
         key: 'id',
       },
-    },
-    opponent_id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'user',
-        key: 'id'
-      },
     }
-
   },
   {
     sequelize,
