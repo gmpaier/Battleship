@@ -3,14 +3,16 @@ const { User } = require('../../models');
 
 router.post('/login', async (req, res) => {
     try {
-        const validUsername = await User.findOne({where: {username: req.body.username}});
-
+      
+        const validUsername = await User.findOne({where: {email: req.body.email}});
+        
         if (!validUsername) {
             res.status(400).json({ message: 'Password or Username is incorrect, please try again'});
             return;
         }
-
+        console.log('before email',validUsername);
         const validPassword = await validUsername.checkPassword(req.body.password);
+        console.log('before',validUsername);
         if (!validPassword) {
             res.status(400).json({ message: 'Password or Username is incorrect, please try again'});
             return;
