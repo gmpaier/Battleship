@@ -1,61 +1,38 @@
 const router = require('express').Router();
-const { User } = require('../../models');
-
-router.post('/', async (req, res) => {
-  try {
-    const userData = await User.create(req.body);
-
-    req.session.save(() => {
-      req.session.user_id = userData.id;
-      req.session.logged_in = true;
-
-      res.status(200).json(userData);
-    });
-  } catch (err) {
-    res.status(400).json(err);
-  }
-});
 
 router.post('/login', async (req, res) => {
-  try {
-    const userData = await User.findOne({ where: { email: req.body.email } });
-    console.log('user data',userData);
-    if (!userData) {
-      res
-        .status(400)
-        .json({ message: 'Incorrect email or password, please try again' });
-      return;
-    }
-    console.log('user password',req.body.password);
-    const validPassword = await userData.checkPassword(req.body.password);
-    console.log('password',validPassword);
-    if (!validPassword) {
-      res
-        .status(400)
-        .json({ message: 'Incorrect email or password, please try again' });
-      return;
-    }
+    try {
+        const validUsername = await User.findOne({where: {username: req.body.username}});
 
-    req.session.save(() => {
-      req.session.user_id = userData.id;
-      req.session.logged_in = true;
-      
-      res.json({ user: userData, message: 'You are now logged in!' });
-    });
+        if (!validUsername) {
+            res.status(400).json({ message: 'Password or Username is incorrect, please try again'});
+            return;
+        }
 
-  } catch (err) {
-    res.status(400).json(err);
-  }
+        const validPassword = await validUsername.checkPassword(req.body.password);
+        if (!validPassword) {
+            res.status(400).json({ message: 'Password or Username is incorrect, please try again'});
+            return;
+        };
+
+        req.session.save(() => {
+            req.session.user_id = validUsername.id;
+            req.session.logged_in = true;
+            res.json({ user: validUsername, message: `Welcome ${validUsername}`})
+        });
+    } catch (err) {
+        res.status(400).json(err);
+    }
 });
 
 router.post('/logout', (req, res) => {
-  if (req.session.logged_in) {
-    req.session.destroy(() => {
-      res.status(204).end();
-    });
-  } else {
-    res.status(404).end();
-  }
+    if (req.session.logged_in) {
+        req.session.destroy(() => {
+            res.status(200).end();
+        });
+    } else {
+        res.status(400).end
+    }
 });
 
 module.exports = router;
