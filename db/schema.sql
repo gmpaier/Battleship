@@ -1,0 +1,6 @@
+-- DROP DATABASE
+DROP DATABASE IF EXISTS battleship_db;
+
+-- CREATE DATABASE
+CREATE DATABASE battleship_db;
+
