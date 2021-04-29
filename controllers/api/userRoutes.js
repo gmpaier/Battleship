@@ -3,7 +3,7 @@ const { User } = require('../../models');
 
 router.post('/login', async (req, res) => {
     try {
-        const validUsername = await User.findOne({where: {username: req.body.username}});
+        const validUsername = await User.findOne({where: {username: req.body.username},  attributes: { exclude: ['password'] }});
 
         if (!validUsername) {
             res.status(400).json({ message: 'Password or Username is incorrect, please try again'});
@@ -19,7 +19,7 @@ router.post('/login', async (req, res) => {
         req.session.save(() => {
             req.session.user_id = validUsername.id;
             req.session.logged_in = true;
-            res.json({ user: validUsername, message: `Welcome ${validUsername}`})
+            res.json({ user: validUsername.username, message: `Welcome ${validUsername.username}`})
         });
     } catch (err) {
         res.status(400).json(err);
@@ -36,16 +36,14 @@ router.post('/logout', (req, res) => {
     }
 });
 
-router.post('/sign-in', (req, res) => {
-    try {
-        const createUser = new User(req.body);
-    user.save()
-    .then(user => {
-        res.redirect('/');
-    }) 
-    } catch (err) {
-        res.status(400).json(err);
-    }
+router.post('/signup', (req, res) => {
+    User.create(req.body)
+    .then((newUser) => {
+        res.send(newUser);
+    })
+    .catch ((err) => {
+        res.json(err);
+    })
 }) 
 
 module.exports = router;
