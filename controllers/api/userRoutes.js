@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { User } = require('../../models');
 
 router.post('/login', async (req, res) => {
     try {
@@ -34,5 +35,17 @@ router.post('/logout', (req, res) => {
         res.status(400).end
     }
 });
+
+router.post('/sign-in', (req, res) => {
+    try {
+        const createUser = new User(req.body);
+    user.save()
+    .then(user => {
+        res.redirect('/');
+    }) 
+    } catch (err) {
+        res.status(400).json(err);
+    }
+})
 
 module.exports = router;

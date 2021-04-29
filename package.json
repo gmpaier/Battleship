@@ -6,21 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "watch": "nodemon server.js",
-    "seed": "node seeds/seed.js"
+    "watch": "nodemon server.js"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:pkamble35/battleship.git"
+    "url": "git+https://github.com/gmpaier/Battleship.git"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Griffin, Don, Priyanka",
   "license": "ISC",
-  "devDependencies": {
-    "eslint": "^7.12.1",
-    "eslint-config-prettier": "^6.15.0",
-    "prettier": "^2.1.2"
-  },
   "dependencies": {
     "bcrypt": "^5.0.0",
     "connect-session-sequelize": "^7.0.4",
@@ -30,5 +23,9 @@
     "express-session": "^1.17.1",
     "mysql2": "^2.2.5",
     "sequelize": "^6.3.5"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/gmpaier/Battleship/issues"
+  },
+  "homepage": "https://github.com/gmpaier/Battleship#readme"
 }
