@@ -18,6 +18,7 @@ Ship.init(
     position: {
       type: DataTypes.STRING,
       allowNull: false
+      // [[0,1,0][0,2,0]]
     },
     alive: {
       type: DataTypes.BOOLEAN,
