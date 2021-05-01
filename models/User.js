@@ -4,7 +4,7 @@ const sequelize = require('../config/connection');
 
 class User extends Model {
   checkPassword(loginPw) {
-    return true;
+    return bcrypt.compareSync(loginPw, this.password);;
   }
 }
 
@@ -19,7 +19,6 @@ User.init(
     username: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'test'
     },
     password: {
       type: DataTypes.STRING,
