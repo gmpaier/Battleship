@@ -22,6 +22,13 @@ Game.init(
     turn: {
       type: DataTypes.BOOLEAN,
       defaultValue: 0
+    },
+    winner_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'user',
+        key: 'id'
+      }
     }
   },
   {
