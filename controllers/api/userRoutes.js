@@ -1,9 +1,9 @@
 const router = require('express').Router();
-const { User } = require('../../models');
+const { User, Friend } = require('../../models');
 
 router.post('/login', async (req, res) => {
     try {
-        const validUsername = await User.findOne({where: {username: req.body.username},  attributes: { exclude: ['password'] }});
+        const validUsername = await User.findOne({where: {username: req.body.username}});
 
         if (!validUsername) {
             res.status(400).json({ message: 'Password or Username is incorrect, please try again'});

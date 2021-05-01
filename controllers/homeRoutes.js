@@ -24,7 +24,7 @@ router.get('/profile', withAuth, async (req, res) => {
     const user = userData.get({ plain: true });
 
     res.render('profile', {
-      ...user,
+      name: User.username,
       logged_in: true
     });
   } catch (err) {
