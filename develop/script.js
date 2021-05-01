@@ -25,6 +25,7 @@ function postMove () {
     activeBoard[row][col][1] = 1;
     $('#result-text').text("Miss at " + coordData);
   }
+  $(this).css("pointer-events", "none")
 }
 
 
