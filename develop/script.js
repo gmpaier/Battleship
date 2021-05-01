@@ -19,10 +19,12 @@ function postMove () {
   let col = coord[1];
   if (activeBoard[row][col][0] === 1){
     activeBoard[row][col][1] = 1;
+    $(this).text(" X ");
     $('#result-text').text("Hit at " + coordData);
   }
   else {
     activeBoard[row][col][1] = 1;
+    $(this).text(" O ");
     $('#result-text').text("Miss at " + coordData);
   }
   $(this).css("pointer-events", "none")
