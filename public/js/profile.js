@@ -2,7 +2,7 @@ const playgame = async (event) => {
   event.preventDefault();
 
   
-      document.location.replace('/battleship');
+      document.location.replace('/game');
     
   
 };

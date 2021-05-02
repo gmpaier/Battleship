@@ -14,6 +14,15 @@ router.get('/', (req, res) => {
 });
 
 // Use withAuth middleware to prevent access to route
+router.get('/game', withAuth, async (req, res) => {
+  try {
+   
+    res.render('game');
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+// Use withAuth middleware to prevent access to route
 router.get('/profile', withAuth, async (req, res) => {
   try {
     // Find the logged in user based on the session ID
@@ -32,15 +41,7 @@ router.get('/profile', withAuth, async (req, res) => {
   }
 });
 
-// Use withAuth middleware to prevent access to route
-router.get('/battleship', withAuth, async (req, res) => {
-  try {
-   
-    res.render('battleship');
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
+
 
 router.get('/login', (req, res) => {
   // If the user is already logged in, redirect the request to another route
