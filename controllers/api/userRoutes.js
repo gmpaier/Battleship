@@ -3,7 +3,7 @@ const { User } = require('../../models');
 
 router.post('/login', async (req, res) => {
     try {
-        const validUsername = await User.findOne({where: {username: req.body.username},  attributes: { exclude: ['password'] }});
+        const validUsername = await User.findOne({where: {username: req.body.username}});
         console.log('user',validUsername);
         if (!validUsername) {
             res.status(400).json({ message: 'Password or Username is incorrect, please try again'});
@@ -20,6 +20,7 @@ router.post('/login', async (req, res) => {
         req.session.save(() => {
             req.session.user_id = validUsername.id;
             req.session.logged_in = true;
+            req.session.username = validUsername.username
             res.json({ user: validUsername.username, message: `Welcome ${validUsername.username}`})
         });
     } catch (err) {
