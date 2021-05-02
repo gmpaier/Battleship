@@ -16,9 +16,90 @@ header, .project:not(:last-child) {
   color: #065b83;
   text-decoration: underline;
 }
-
-.dollar-amount {
-  color: #056605;
-  font-weight: bold;
-  margin-left: -5px;
+.container1 {
+  display: flex;
+}
+.grid-user {
+  width: 402px;
+  height: 402px;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white;
+  border: 1px solid black;
+  margin: 20px;
+}
+.grid div {
+  width: 40px;
+  height: 40px;
+  border: 1px solid black;
+}
+.grid-computer {
+  width: 402px;
+  height: 402px;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white;
+  border: 1px solid black;
+  margin: 20px;
+}
+.grid-display {
+  width: 400px;
+  height: 400px;
+  margin: 20px;
+  background-color: yellow;
+}
+.destroyer-container {
+  width: 80px;
+  height: 40px;
+  margin: 10px;
+  background-color: orange;
+  display: flex;
+}
+.submarine-container {
+  width: 120px;
+  height: 40px;
+  margin: 10px;
+  background-color: magenta;
+  display: flex;
+}
+.battleship-container {
+  width: 160px;
+  height: 40px;
+  margin: 10px;
+  background-color: pink;
+  display: flex;
+}
+.carrier-container {
+  width: 200px;
+  height: 40px;
+  margin: 10px;
+  background-color: red;
+  display: flex;
+}
+.cruise-container {
+  width: 220px;
+  height: 40px;
+  margin: 10px;
+  background-color: green;
+  display: flex;
+}
+.ship div {
+  width: 80px;
+  height: 40px;
+}
+.destroyer {
+  background-color: orange;
+}
+.submarine {
+  background-color: magenta;
+}
+.battleship {
+  background-color: pink;
+}
+.carrier {
+  background-color: red;
+}
+.cruise {
+  
+  background-color: green;
 }
