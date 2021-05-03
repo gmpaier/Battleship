@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const userGrid = document.querySelector('.grid-user');
-    const computerGrid = document.querySelector('.grid-computer');
+    const opGrid = document.querySelector('.grid-op');
     const displayGrid = document.querySelector('.grid-display');
     const ships = document.querySelector('.ship');
     const destroyer = document.querySelector('.destroyer-container');
@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const start = document.querySelector('.start');
     const reset = document.querySelector('.reset');
 
-    const userSquares = [];
-    const computerSquares = [];
+    const mySquares = [];
+    const opSquares = [];
     const width = 10;
 
     function createBoard(grid, squares) {
@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    createBoard(userGrid, userSquares);
-    createBoard(computerGrid, computerSquares);
+    createBoard(userGrid, mySquares);
+    createBoard(opGrid, opSquares);
 
     const shipsArray = [
         {
@@ -75,14 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let current = ship.directions[randomDirection];
         if (randomDirection === 0) direction = 1;
         if (randomDirection === 1) direction = 10;
-        let randomStart = Math.abs(Math.floor(Math.random() * computerSquares.length - (ship.directions[0].length * direction)));
-        const isSpotFree = current.some(index => computerSquares[randomStart + index].classList.contains('reserved'));
-        const isRightEdge = current.some(index => computerSquares[randomStart + index] % width === width - 1);
-        const isLeftEdge = current.some(index => computerSquares[randomStart + index] % width === 0);
+        let randomStart = Math.abs(Math.floor(Math.random() * opSquares.length - (ship.directions[0].length * direction)));
+        const isSpotFree = current.some(index => opSquares[randomStart + index].classList.contains('reserved'));
+        const isRightEdge = current.some(index => opSquares[randomStart + index] % width === width - 1);
+        const isLeftEdge = current.some(index => opSquares[randomStart + index] % width === 0);
         console.log('isSpotFree',isSpotFree);
         if (!isSpotFree && !isRightEdge && !isLeftEdge) {
             current.forEach(
-                index => computerSquares[randomStart + index].classList.add('reserved', ship.name)
+                index => opSquares[randomStart + index].classList.add('reserved', ship.name)
             );
         }
         else {
@@ -94,6 +94,4 @@ document.addEventListener('DOMContentLoaded', () => {
     generate(shipsArray[2]);
     generate(shipsArray[3]);
     generate(shipsArray[4]);
-}
-
-)
+})

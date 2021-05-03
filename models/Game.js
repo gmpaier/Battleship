@@ -15,6 +15,11 @@ Game.init(
       type: DataTypes.STRING,
       allowNull: false
     },
+    start: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
