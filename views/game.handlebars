@@ -1,16 +1,6 @@
-<div class="container1">
-    <div class="row justify-content-around">
-        <div class="grid grid-user"></div>
-        <div class="grid grid-computer"></div>
-    </div>
-    <div class="row">
-        <div class="hidden-info">
-
-            <button id="start">Start Game</button>
-            <button id="start">Reset</button>
-        </div>
-    </div>
-    <div class="grid-display row">
+ <p style="float: right;">Timer: <span id="countdown"></span></p>
+<div class="play-grid">
+    <div class="grid-display ">
         <div class="ship destroyer-container" draggable="true">
             <div id="destroyer-1"></div>
             <div id="destroyer-2"></div>
@@ -42,5 +32,22 @@
             <div id="cruise-6"></div>
         </div>
     </div>
+    <div class="grid grid-user  ">
+
+    </div>
+    <div class="grid grid-computer "></div>
+</div>
+<div class="button-grid ">
+    <button id="start">Start Game</button>
+    <button id="start">Reset</button>
+</div>
+<div class="chat-grid">
+    <input type="text" class="input input__textarea " placeholder="Chat with opponent" />
+    <div class="chat-states">
+        <div class="chat-state chat-state__typing chat-state__invisible">Opponent is typing...</div>
+    </div>
+    <ul class="chat-messages">
+        <li class="chat-message chat-message__holder none"></li>
+    </ul>
 </div>
 <script src="./js/game.js"></script>

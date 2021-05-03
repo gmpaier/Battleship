@@ -14,7 +14,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const userSquares = [];
     const computerSquares = [];
     const width = 10;
-
+      
+    var timeleft = 120;
+    var x = setInterval(function () {
+        if (timeleft <= 0) {
+            clearInterval(x);
+            document.getElementById("countdown").innerHTML = 0;
+            complete(true);
+        } else {
+            document.getElementById("countdown").innerHTML = timeleft;
+        }
+        timeleft -= 1;
+    }, 1000);
     function createBoard(grid, squares) {
         for (let i = 0; i < width * width; i++) {
             const square = document.createElement('div');
@@ -70,30 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ]
 
-    function generate(ship) {
-        let randomDirection = Math.floor(Math.random() * ship.directions.length);
-        let current = ship.directions[randomDirection];
-        if (randomDirection === 0) direction = 1;
-        if (randomDirection === 1) direction = 10;
-        let randomStart = Math.abs(Math.floor(Math.random() * computerSquares.length - (ship.directions[0].length * direction)));
-        const isSpotFree = current.some(index => computerSquares[randomStart + index].classList.contains('reserved'));
-        const isRightEdge = current.some(index => computerSquares[randomStart + index] % width === width - 1);
-        const isLeftEdge = current.some(index => computerSquares[randomStart + index] % width === 0);
-        console.log('isSpotFree',isSpotFree);
-        if (!isSpotFree && !isRightEdge && !isLeftEdge) {
-            current.forEach(
-                index => computerSquares[randomStart + index].classList.add('reserved', ship.name)
-            );
-        }
-        else {
-            generate(ship);
-        }
-    }
-    generate(shipsArray[0]);
-    generate(shipsArray[1]);
-    generate(shipsArray[2]);
-    generate(shipsArray[3]);
-    generate(shipsArray[4]);
+    
 }
 
 )
