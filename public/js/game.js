@@ -16,11 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const width = 10;
 
     function createBoard(grid, squares) {
-        for (let i = 0; i < width * width; i++) {
-            const square = document.createElement('div');
-            square.dataset.id = i;
-            grid.appendChild(square);
-            squares.push(square);
+        for (let i = 0; i < width; i++) {
+            for (let j = 0; j < width; j++){
+                const square = document.createElement('div');
+                square.setAttribute("value", `[${i},${j}]`);
+                grid.appendChild(square);
+                squares.push(square);
+            }
         }
     }
 
