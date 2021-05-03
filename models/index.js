@@ -6,12 +6,12 @@ const Board = require('./Board');
 const Ship = require('./Ship');
 
 User.hasMany(Game, {
-  foreignKey: 'user_id',
+  foreignKey: 'winner_id',
   onDelete: 'SET NULL'
 });
 
 Game.belongsTo(User, {
-  foreignKey: 'user_id',
+  foreignKey: 'winner_id',
   as: 'won_games'
 });
 
