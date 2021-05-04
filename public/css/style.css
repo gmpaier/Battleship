@@ -103,3 +103,35 @@ header, .project:not(:last-child) {
   
   background-color: green;
 }
+
+/*the following styles were added by Griffin for gameTest, feel free to remove if no longer needed :) */
+  
+.grid-container {
+  display: grid;
+  justify-content: center;
+  grid-gap: 10px;
+  background-color: #2196F3;
+  padding: 10px;
+  grid-template-columns: auto auto;
+}
+  
+.game-grid {
+  display: grid;
+  justify-content: center;
+  grid-gap: 10px;
+  background-color: #2196F3;
+  padding: 10px;
+  grid-template-columns: auto auto auto auto auto auto auto auto auto auto;
+}
+
+.game-grid > div {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-size: 30px;
+}
+
+.centre {
+  text-align: center;
+}
+
+/* end of gameTest styles */

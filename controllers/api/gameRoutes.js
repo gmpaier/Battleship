@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const { Op } = require("sequelize")
-const { User, Game, UserGame, Board, Ship } = require('../../models');
+const { User, Game, UserGame, Board, Ship, Chat } = require('../../models');
 const { sequelize } = require('../../models/Game');
+const withAuth = require('../utils/auth');
 
 router.get("/", withAuth, async (req, res) => {
   try {
@@ -95,7 +96,7 @@ router.post("/ships", withAuth, async (req, res) => {
       return;
     }
     const ships = [];
-    req.body.ships.forEach((ship) => {
+    req.body.ships.forEach( async (ship) => {
       const newShip = await Ship.create(ship);
       ships.push(newShip);
     });
@@ -116,5 +117,15 @@ router.post("/move", withAuth, async (req, res) => {
   }
 });
 
+router.post("/chat", withAuth, async (req, res) => {
+  try {
+    const newChat = await Chat.create(req.body);
+
+    res.json(newChat);
+  }
+  catch (err) {
+    res.status(400).json(err);
+  }
+})
 
 module.exports = router;

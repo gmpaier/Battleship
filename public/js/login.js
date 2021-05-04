@@ -1,10 +1,14 @@
-const loginFormHandler = async (event) => {
+const loginFormHandler = (event) => {
   event.preventDefault();
 
   // Collect values from the login form
   const username = document.querySelector('#name-login').value.trim();
   const password = document.querySelector('#password-login').value.trim();
 
+  loginHandler(username, password);
+};
+
+const loginHandler = async (username, password) => {
   if (username && password) {
     // Send a POST request to the API endpoint
     const response = await fetch('/api/users/login', {
@@ -20,7 +24,7 @@ const loginFormHandler = async (event) => {
       alert(response.statusText);
     }
   }
-};
+}
 
 const signupFormHandler = async (event) => {
   event.preventDefault();
@@ -36,7 +40,7 @@ const signupFormHandler = async (event) => {
     });
 
     if (response.ok) {
-      document.location.replace('/profile');
+      loginHandler(name, password);
     } else {
       alert(response.statusText);
     }

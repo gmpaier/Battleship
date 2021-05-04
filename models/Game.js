@@ -11,10 +11,6 @@ Game.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
     start: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
