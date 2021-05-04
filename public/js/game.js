@@ -14,7 +14,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const mySquares = [];
     const opSquares = [];
     const width = 10;
-
+      
+    var timeleft = 120;
+    var x = setInterval(function () {
+        if (timeleft <= 0) {
+            clearInterval(x);
+            document.getElementById("countdown").innerHTML = 0;
+            complete(true);
+        } else {
+            document.getElementById("countdown").innerHTML = timeleft;
+        }
+        timeleft -= 1;
+    }, 1000);
     function createBoard(grid, squares) {
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < width; j++){
