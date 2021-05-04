@@ -43,7 +43,7 @@ router.post("/", withAuth, async (req, res) => {
     const user = await User.findByPk(req.session.user_id);
     const newGame = await user.createGame(req.body);
     await Board.create({game_id: newGame.id, user_id: user.id});
-    return res.json(newGame);
+    return res.status(200).json(newGame);
   }
   catch (err) {
     res.status(400).json(err);
@@ -53,33 +53,30 @@ router.post("/", withAuth, async (req, res) => {
 //post 2nd player to game (post new board)
 router.post("/join", withAuth, async (req, res) => {
   try {
-    const game = await sequelize.query(`SELECT Game.id as id, Game.active as active, User.id as user, COUNT(User) as userCount FROM Game JOIN UserGame on Game.id = UserGame.game_id JOIN User on UserGame.user_id = User.id WHERE Game.id = ${req.body.game_id}`);
+    const game = await Game.findByPk(req.body.game_id);
 
     if (!game) {
       res.status(400).json({ message: 'No game found with this id'});
       return;
     }
 
-    game.forEach(({user, userCount, active}) => {
-      if (active = false){
-        res.status(400).json({ message: 'This game is inactive and cannot be joined'});
-        return;
-      }
+    if (game.active === false) {
+      res.status(400).json({message: 'This game is no longer active!'})
+    }
 
-      if (userCount > 1){
-        res.status(400).json({ message: 'This game already has the maximum number of players'});
-        return;
-      }
+    if (game.two_id) {
+      res.status(400).json({message: 'This game already has the maximum number of players.'});
+      return;
+    }
 
-      if (user == req.session.user_id){
-        res.status(400).json({ message: 'You are already a part of this game!'});
-        return;
-      }
-    });
+    if (game.one_id === req.session.user_id) {
+      res.status(400).json({message: 'You are already a part of this game!'});
+      return;
+    }
 
-    await UserGame.create({game_id: req.body.game_id, user_id: req.session.user_id});
+    
     await Board.create({game_id: req.body.game_id, user_id: req.session.user_id});
-    res.status(200).json("You have been added to this game");
+    res.status(200).json(game);
   }
   catch (err) {
     res.status(400).json(err);
@@ -89,7 +86,12 @@ router.post("/join", withAuth, async (req, res) => {
 //post ships to board
 router.post("/ships", withAuth, async (req, res) => {
   try {
-    const board = await Board.findByPk(req.body.board_id);
+    const board = await Board.findAll({
+      where: {
+        user_id: req.body.user_id,
+        game_id: req.body.game_id
+      }
+    });
     const hasShips = await sequelize.query(`SELECT COUNT(Ship.id) FROM Board JOIN Ship on Board.id = Ship.board_id WHERE Board.id=${board.id}`);
     if (hasShips) {
       res.status(400).json({ message: 'There are already ships associated with this board!'});

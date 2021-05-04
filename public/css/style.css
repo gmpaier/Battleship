@@ -33,7 +33,7 @@ header, .project:not(:last-child) {
   height: 40px;
   border: 1px solid black;
 }
-.grid-computer {
+.grid-op {
   width: 402px;
   height: 402px;
   display: flex;
@@ -77,7 +77,7 @@ header, .project:not(:last-child) {
   display: flex;
 }
 .cruise-container {
-  width: 220px;
+  width: 120px;
   height: 40px;
   margin: 10px;
   background-color: green;
