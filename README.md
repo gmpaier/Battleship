@@ -1,12 +1,12 @@
 # Battleship
 
-We created Battleship type game to keep people entertained.
+We were talking among ourselves and talking about our interests and video games, and we created a Battleship type game to keep players entertained.
+
+## User Story
+If you are someone who is still stuck at home due to Covid, why not spend some time online with friends and play some videogames. Whether you are someone who is bored looking to pass some time, or a coding student looking to test and improve your skills, this is a game that allows someone to play other users in a game of Battleship.
 
 ## Usage
 #Demo
-
-## User Story
-Whether you are someone who is bored looking to pass some time, or a coding student looking to test and improve your skills, this is a game that allows someone to play other users in a game of Battleship.
 
 ## Game App Directions
 Upon entering the page, the user signs up and logs in in order to keep track of a players stats
@@ -25,17 +25,21 @@ Remembering the GIT process took some time.
 Finding the new technology that would help
     Planned on using Websockets (two way connection) and ServerSet Events (one way connection). If starting project over we would start using Websockets for the start
 
+## Successes
+Delagation of responsibilities - We each took something we knew we could do
+Getting a functioning 2 player game and getting the servers to talk to each other
+
 
 ## Future Features
 In the future we would like to keep a database for each user with player stats, including wins, loses, and games played.
 Using Websockets to lessen the CPU load
 
 ## Screenshots
-![Landing Page](./assets/images/landing-page.png)
-![Results Page](./assets/images/results-page.png)
-![Recipe Page](./assets/images/recipe-page.png)
+![Landing Page]
+![Results Page]
+![Recipe Page]
 
-## Deployed Link
+## Deployed Links
 https://gpaier.github.io/Battleship
 
 ### Contributors
