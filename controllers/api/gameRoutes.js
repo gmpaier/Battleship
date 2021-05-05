@@ -40,9 +40,14 @@ router.get("/id/:id", withAuth, async (req, res) => {
 //post a new game (post board)
 router.post("/", withAuth, async (req, res) => {
   try {
-    const user = await User.findByPk(req.session.user_id);
-    const newGame = await user.createGame(req.body);
-    await Board.create({game_id: newGame.id, user_id: user.id});
+    const userData = await User.findByPk(req.session.user_id);
+    const user = userData.get({ plain: true });
+    console.log(user);
+    const newGameData = await Game.create({id_one: user.id}, { fields: ['id_one']});
+    const newGame = newGameData.get({ plain: true })
+    console.log(newGame);
+    await Board.create({game_id: newGame.id, user_id: user.id}, {fields: ['game_id', 'user_id']});
+    req.session.game_id = newGame.id;
     return res.status(200).json(newGame);
   }
   catch (err) {
@@ -74,7 +79,12 @@ router.post("/join", withAuth, async (req, res) => {
       return;
     }
 
-    
+    await Game.update({id_two}, {
+      where: {
+        id: game.id
+      }
+    })
+    req.session.game_id = game.id;
     await Board.create({game_id: req.body.game_id, user_id: req.session.user_id});
     res.status(200).json(game);
   }

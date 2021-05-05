@@ -1,6 +1,5 @@
 const Game = require('./Game');
 const User = require('./User');
-const Friend = require('./Friend');
 const Board = require('./Board');
 const Ship = require('./Ship');
 const Chat = require ('./Chat');
@@ -35,14 +34,6 @@ Game.belongsTo(User, {
   as: 'won_games'
 });
 
-User.belongsToMany(User, {
-  through: {
-    model: Friend,
-    unique: false 
-  },
-  as: 'my_friends'
-});
-
 Game.hasMany(Board, {
   foreignKey: 'game_id',
   onDelete: 'CASCADE'
@@ -53,12 +44,12 @@ Board.belongsTo(Game, {
 });
 
 User.hasMany(Board, {
-  foreignKey: 'player_id',
+  foreignKey: 'user_id',
   onDelete: 'CASCADE'
 });
 
 Board.belongsTo(User, {
-  foreignKey: 'player_id'
+  foreignKey: 'user_id'
 });
 
 Board.hasMany(Ship, {
@@ -91,7 +82,6 @@ Chat.belongsTo(Game, {
 module.exports = {
   Game, 
   User,
-  Friend,
   Board,
   Ship,
   Chat
