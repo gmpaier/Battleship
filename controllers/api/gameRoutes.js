@@ -103,6 +103,11 @@ router.post("/ships", withAuth, async (req, res) => {
       const newShip = await Ship.create(ship);
       ships.push(newShip);
     });
+    await Board.update({set: true}, {
+      where: {
+        id: board.id
+      }
+    })
     res.json(ships);
   }
   catch (err) {
@@ -113,7 +118,13 @@ router.post("/ships", withAuth, async (req, res) => {
 //post move to board
 router.post("/move", withAuth, async (req, res) => {
   try {
-    // req.body should pass a coordinate [x,y]      
+    const board = await Board.findAll({
+      where: {
+        user_id: req.session.user_id,
+        game_id: req.session.game_id
+      }
+    });
+    // IM NOT DONE DON"T FORGET ABOUT ME     
   }
   catch (err) {
     res.status(400).json(err);
