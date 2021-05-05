@@ -11,6 +11,11 @@ Board.init(
       primaryKey: true,
       autoIncrement: true,
     },
+    set: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
     state: {
       type: DataTypes.STRING,
       allowNull: false,

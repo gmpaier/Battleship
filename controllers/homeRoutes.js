@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
 // Use withAuth middleware to prevent access to route
 router.get('/game', withAuth, async (req, res) => {
   try {
-   
+    req.session.game_id = req.body.game_id
     res.render('game');
   } catch (err) {
     res.status(500).json(err);

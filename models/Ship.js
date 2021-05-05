@@ -11,14 +11,13 @@ Ship.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    size: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
     position: {
       type: DataTypes.STRING,
       allowNull: false
-      // [[0,1,0][0,2,0]]
+    },
+    hits: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
     alive: {
       type: DataTypes.BOOLEAN,

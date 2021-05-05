@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { Op } = require("sequelize")
-const { User, Game, UserGame, Board, Ship, Chat } = require('../../models');
+const { User, Game, Board, Ship, Chat } = require('../../models');
 const { sequelize } = require('../../models/Game');
 const withAuth = require('../utils/auth');
 
@@ -88,8 +88,8 @@ router.post("/ships", withAuth, async (req, res) => {
   try {
     const board = await Board.findAll({
       where: {
-        user_id: req.body.user_id,
-        game_id: req.body.game_id
+        user_id: req.session.user_id,
+        game_id: req.session.game_id
       }
     });
     const hasShips = await sequelize.query(`SELECT COUNT(Ship.id) FROM Board JOIN Ship on Board.id = Ship.board_id WHERE Board.id=${board.id}`);
@@ -99,6 +99,7 @@ router.post("/ships", withAuth, async (req, res) => {
     }
     const ships = [];
     req.body.ships.forEach( async (ship) => {
+      ship.board_id = board.id;
       const newShip = await Ship.create(ship);
       ships.push(newShip);
     });

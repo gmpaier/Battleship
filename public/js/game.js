@@ -1,118 +1,135 @@
 document.addEventListener('DOMContentLoaded', () => {
     const myGrid = document.querySelector('.grid-user');
     const opGrid = document.querySelector('.grid-op');
-    const displayGrid = document.querySelector('.grid-display');
-    const ships = document.querySelector('.ship');
-    const destroyer = document.querySelector('.destroyer-container');
-    const cruiser = document.querySelector('.cruise-container');
-    const submarine = document.querySelector('.submarine-container');
-    const battleship = document.querySelector('.battleship-container');
-    const carrier = document.querySelector('.carrier-container');
-    const start = document.querySelector('.start');
-    const reset = document.querySelector('.reset');
 
     const mySquares = [];
     const opSquares = [];
     const width = 10;
-      
-    var timeleft = 120;
-    var x = setInterval(function () {
-        if (timeleft <= 0) {
-            clearInterval(x);
-            document.getElementById("countdown").innerHTML = 0;
-            complete(true);
-        } else {
-            document.getElementById("countdown").innerHTML = timeleft;
-        }
-        timeleft -= 1;
-    }, 1000);
-    function createBoard(grid, squares) {
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < width; j++){
-                const square = document.createElement('div');
-                square.setAttribute("value", `[${i},${j}]`);
-                grid.appendChild(square);
-                squares.push(square);
-            }
-        }
-    }
-
-    createBoard(myGrid, mySquares);
-    createBoard(opGrid, opSquares);
 
     const shipsArray = [
         {
             name: "destroyer",
-            directions: [
-                [0, 1],
-                [0, width]
-            ]
+            coord: [0, 1]
 
         },
         {
             name: "cruise",
-            directions: [
-                [0, 1, 2],
-                [0, width, width * 2]
-            ]
+            coord: [0, 1, 2]
 
         },
         {
             name: "submarine",
-            directions: [
-                [0, 1, 2],
-                [0, width, width * 2]
-            ]
+            coord: [0, 1, 2]
 
         },
         {
             name: "battleship",
-            directions: [
-                [0, 1, 2, 3],
-                [0, width, width * 2, width * 3]
-            ]
-
+            coord: [0, 1, 2, 3]
         },
         {
             name: "carrier",
-            directions: [
-                [0, 1, 2, 3, 4],
-                [0, width, width * 2, width * 3, width * 4]
-            ]
-
+            coord: [0, 1, 2, 3, 4]
         }
     ]
+  
+  const placedShips = []
+
+    function createBoard(grid, squares) {
+      for (let i = 0; i < width; i++) {
+          const row = [];
+          for (let j = 0; j < width; j++){
+              const square = document.createElement('div');
+              square.setAttribute("value", `[${i},${j}]`);
+              grid.appendChild(square);
+              row.push(square);
+          }
+          squares.push(row);
+      }
+    }
 
     function generate(ship) {
-        let randomDirection = Math.floor(Math.random() * ship.directions.length);
-        let current = ship.directions[randomDirection];
-        if (randomDirection === 0) direction = 1;
-        if (randomDirection === 1) direction = 10;
-        let randomStart = Math.abs(Math.floor(Math.random() * opSquares.length - (ship.directions[0].length * direction)));
-        const isSpotFree = current.some(index => opSquares[randomStart + index].classList.contains('reserved'));
-        const isRightEdge = current.some(index => opSquares[randomStart + index] % width === width - 1);
-        const isLeftEdge = current.some(index => opSquares[randomStart + index] % width === 0);
-        console.log('isSpotFree',isSpotFree);
-        if (!isSpotFree && !isRightEdge && !isLeftEdge) {
-            current.forEach(
-                index => opSquares[randomStart + index].classList.add('reserved', ship.name)
-            );
+        let myShip = {
+          position: [],
+          hits: []
+        };
+        let randomDirection = Math.floor(Math.random() * 2);
+        let randomStart = Math.floor(Math.random() * (width - ship.coord.length));
+        let otherRandom = Math.floor(math.random() * width)
+        let isSpotTaken;
+        if (randomDirection === 0) {
+          //horizontal
+          isSpotTaken = ship.coord.some(index => mySquares[otherRandom][randomStart + index].classList.contains('reserved'));
+        }
+        if (randomDirection === 1) {
+          //vertical
+          isSpotTaken = ship.coord.some(index => mySquares[randomStart + index][otherRandom].classList.contains('reserved'));
+        }
+        console.log('isSpotFree',isSpotTaken);
+        if (!isSpotTaken) {
+          if (randomDirection === 0) {
+            ship.coord.forEach((index) => {
+              mySquares[otherRandom][randomStart + index].classList.add('reserved', ship.name);
+              let coord = JSON.parse(mySquares[otherRandom][randomStart + index].value);
+              myShip.position.push(coord);
+              myShip.hits.push(0);
+            });
+          }
+          else {
+            ship.coord.forEach((index) => {
+              mySquares[randomStart + index][otherRandom].classList.add('reserved', ship.name);
+              let coord = JSON.parse(mySquares[randomStart + index][otherRandom].value);
+              myShip.position.push(coord);
+              myShip.hits.push(0);
+            });
+          }
+          placedShips.push(myShip);
         }
         else {
             generate(ship);
         }
     }
-    generate(shipsArray[0]);
-    generate(shipsArray[1]);
-    generate(shipsArray[2]);
-    generate(shipsArray[3]);
-    generate(shipsArray[4]);
-})
 
-// Timer that counts down from 5
-function countdown() {
+    function resetShips() {
+      mySquares.forEach((square) => {
+          square.className = '';
+      });
+      placedShips.splice(0, placedShips.length);
+      shipsArray.forEach((ship) => {
+        generate(ship);
+      });   
+    }
+
+    function postShips() {
+      if (name && password) {
+        const response = await fetch('/api/games/ships', {
+          method: 'POST',
+          body: JSON.stringify({ships: placedShips}),
+          headers: { 'Content-Type': 'application/json' },
+        });
+    
+        if (response.ok) {
+          loginHandler(name, password);
+        } else {
+          alert(response.statusText);
+        }
+      }
+    }
+
+//runtime
+    createBoard(myGrid, mySquares);
+    createBoard(opGrid, opSquares);
+
+    shipsArray.forEach((ship) => {
+      generate(ship);
+    })
+
+    $(document).on("click", ".reset", resetShips);
+    $(document).on("click", ".start", postShips)
+
+  // Timer that doesn't do anything
+  function countdown() {
     var timeLeft = 5;
-  
+
     // Use the `setInterval()` method to call a function to be executed every 1000 milliseconds
     var timeInterval = setInterval(function () {
       // As long as the `timeLeft` is greater than 1
@@ -135,3 +152,6 @@ function countdown() {
       }
     }, 1000);
   }
+
+});
+
