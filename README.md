@@ -6,7 +6,7 @@ We were talking among ourselves and talking about our interests and video games,
 If you are someone who is still stuck at home due to Covid, why not spend some time online with friends and play some videogames. Whether you are someone who is bored looking to pass some time, or a coding student looking to test and improve your skills, this is a game that allows someone to play other users in a game of Battleship.
 
 ## Usage
-#Demo
+#Demo 
 
 ## Game App Directions
 Upon entering the page, the user signs up and logs in in order to keep track of a players stats
