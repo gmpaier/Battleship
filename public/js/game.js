@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         let randomDirection = Math.floor(Math.random() * 2);
         let randomStart = Math.floor(Math.random() * (width - ship.coord.length));
-        let otherRandom = Math.floor(math.random() * width)
+        let otherRandom = Math.floor(Math.random() * width)
         let isSpotTaken;
         if (randomDirection === 0) {
           //horizontal
@@ -64,12 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
           //vertical
           isSpotTaken = ship.coord.some(index => mySquares[randomStart + index][otherRandom].classList.contains('reserved'));
         }
-        console.log('isSpotFree',isSpotTaken);
         if (!isSpotTaken) {
           if (randomDirection === 0) {
             ship.coord.forEach((index) => {
               mySquares[otherRandom][randomStart + index].classList.add('reserved', ship.name);
-              let coord = JSON.parse(mySquares[otherRandom][randomStart + index].value);
+              console.log(mySquares[otherRandom][randomStart + index]);
+              let coord = JSON.parse(mySquares[otherRandom][randomStart + index].getAttribute('value'));
               myShip.position.push(coord);
               myShip.hits.push(0);
             });
@@ -77,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
           else {
             ship.coord.forEach((index) => {
               mySquares[randomStart + index][otherRandom].classList.add('reserved', ship.name);
-              let coord = JSON.parse(mySquares[randomStart + index][otherRandom].value);
+              console.log(mySquares[randomStart + index][otherRandom]);
+              let coord = JSON.parse(mySquares[randomStart + index][otherRandom].getAttribute('value'));
               myShip.position.push(coord);
               myShip.hits.push(0);
             });
@@ -90,8 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetShips() {
-      mySquares.forEach((square) => {
+      mySquares.forEach((row) => {
+        row.forEach((square) => {
           square.className = '';
+        })  
       });
       placedShips.splice(0, placedShips.length);
       shipsArray.forEach((ship) => {
@@ -99,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });   
     }
 
-    function postShips() {
+    async function postShips () {
       if (name && password) {
         const response = await fetch('/api/games/ships', {
           method: 'POST',
@@ -123,8 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
       generate(ship);
     })
 
-    $(document).on("click", ".reset", resetShips);
-    $(document).on("click", ".start", postShips)
+    $(document).on("click", "#reset", resetShips);
+    $(document).on("click", "#start", postShips)
+    
 
   // Timer that doesn't do anything
   function countdown() {
