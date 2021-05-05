@@ -11,18 +11,18 @@ router.post('/login', async (req, res) => {
         }
         console.log('req.body.password',req.body.password);
         const validPassword = await validUsername.checkPassword(req.body.password);
-        console.log('validPassword',validPassword);
+        
         if (!validPassword) {
             res.status(400).json({ message: 'Password or Username is incorrect, please try again'});
             return;
         };
-
-        req.session.save(() => {
-            req.session.user_id = validUsername.id;
-            req.session.logged_in = true;
-            req.session.username = validUsername.username
-            res.json({ user: validUsername.username, message: `Welcome ${validUsername.username}`})
-        });
+        
+        req.session.user_id = validUsername.id;
+        req.session.logged_in = true;
+        req.session.username = validUsername.username
+        
+        console.log(req.session);
+        res.json({ user: validUsername.username, message: `Welcome ${validUsername.username}`})
     } catch (err) {
         res.status(400).json(err);
     }

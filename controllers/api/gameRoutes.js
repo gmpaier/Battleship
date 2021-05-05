@@ -7,7 +7,13 @@ const withAuth = require('../../utils/auth');
 router.get("/", withAuth, async (req, res) => {
   try {
     const user = await User.findByPk(req.session.user_id);
-    const games = await user.getGames();
+    if (!req.session.game_id){
+      const games = await user.getGames();
+    }
+    else {
+      const games = await Game.findByPk(req.session.game_id);
+    }
+    
     res.json(games);
   }
   catch (err) {
@@ -26,11 +32,51 @@ router.get("/active", withAuth, async (req, res) => {
   }
 });
 
-router.get("/id/:id", withAuth, async (req, res) => {
+router.get("/play", withAuth, async (req, res) => {
   try {
-    const game = await Game.findByPk(req.params.id)
+    const game = await Game.findByPk(req.session.game_id);
+    const boards = await game.getBoards();
+    console.log(boards);
+    if (boards.length < 2){
+      res.json({ message: "no"});
+    }
+    const allSet = boards.every((board) => {
+      return board.set === true;
+    });
+    if (allSet === true) {
+      res.json({ message: "yes"});
+    }
+    else {
+      res.json({ message: "no"})
+    }
+  }
+  catch (err) {
+    res.status(400).json(err);
+  }
+})
+
+router.get("/status", withAuth, async (req, res) => {
+  try {
+    const gameData = await Game.findByPk(req.session.game_id);
+    const game = gameData.get({ plain: true });
+    const myBoardData = await Board.findOne({
+      where: {
+        game_id: game.id,
+        user_id: req.session.user_id
+      }
+    });
+    const myBoard = myBoardData.get({ plain: true });
     
-    res.json(game);
+    const opBoardData = await Board.findOne({
+      where: {
+        game_id: game.id,
+        user_id: {
+          [Op.ne]: req.session.user_id
+        }
+      }
+    });
+    const opBoard = opBoardData.get({ plain: true });
+
   }
   catch (err) {
     res.status(400).json(err);
@@ -42,10 +88,8 @@ router.post("/", withAuth, async (req, res) => {
   try {
     const userData = await User.findByPk(req.session.user_id);
     const user = userData.get({ plain: true });
-    console.log(user);
     const newGameData = await Game.create({id_one: user.id}, { fields: ['id_one']});
-    const newGame = newGameData.get({ plain: true })
-    console.log(newGame);
+    const newGame = newGameData.get({ plain: true });
     await Board.create({game_id: newGame.id, user_id: user.id}, {fields: ['game_id', 'user_id']});
     req.session.game_id = newGame.id;
     return res.status(200).json(newGame);
@@ -58,7 +102,8 @@ router.post("/", withAuth, async (req, res) => {
 //post 2nd player to game (post new board)
 router.post("/join", withAuth, async (req, res) => {
   try {
-    const game = await Game.findByPk(req.body.game_id);
+    const gameData = await Game.findByPk(req.body.game_id);
+    const game = gameData.get({ plain: true });
 
     if (!game) {
       res.status(400).json({ message: 'No game found with this id'});
@@ -69,23 +114,23 @@ router.post("/join", withAuth, async (req, res) => {
       res.status(400).json({message: 'This game is no longer active!'})
     }
 
-    if (game.two_id) {
+    if (game.id_two) {
       res.status(400).json({message: 'This game already has the maximum number of players.'});
       return;
     }
 
-    if (game.one_id === req.session.user_id) {
+    if (game.id_one === req.session.user_id) {
       res.status(400).json({message: 'You are already a part of this game!'});
       return;
     }
 
-    await Game.update({id_two}, {
+    await Game.update({id_two: req.session.user_id}, {
       where: {
         id: game.id
       }
     })
     req.session.game_id = game.id;
-    await Board.create({game_id: req.body.game_id, user_id: req.session.user_id});
+    await Board.create({game_id: game.id, user_id: req.session.user_id});
     res.status(200).json(game);
   }
   catch (err) {
@@ -125,16 +170,51 @@ router.post("/ships", withAuth, async (req, res) => {
   }
 });
 
+router.post('/start', withAuth, async (req, res) => {
+  try {
+    const gameData = await Game.findByPk(req.session.game_id);
+    const game = gameData.get({ plain: true });
+    const boardData = await game.getBoards();
+    const boards =  boardData.map((board) => board.get({ plain: true }));
+    if (boards.length < 2){
+      res.status(400).json({message: "This game doesn't have two players!"})
+    }
+    const isSet = boards.every((board) => {
+      return board.set === true;
+    });
+    if (!isSet){
+      res.status(400).json({message: "Both players have not yet placed their ships!"})
+    }
+    if (game.start === false){
+      randomTurn = Math.floor(Math.random * 2) + 1;
+      await Game.update({start: true, turn: randomTurn}, {
+        where: {
+          id: game.id
+        }
+      });
+      res.json({message: "Begin game"});
+    }
+    else {
+      res.json({message: "Begin game"});
+    }
+  }
+  catch (err) {
+    res.status(400).json(err);
+  }
+})
+
 //post move to board
-router.post("/move", withAuth, async (req, res) => {
+router.post("/shot", withAuth, async (req, res) => {
   try {
     const board = await Board.findAll({
       where: {
-        user_id: req.session.user_id,
+        user_id: {
+          [Op.ne]: req.session.user_id
+        },
         game_id: req.session.game_id
       }
     });
-    // IM NOT DONE DON"T FORGET ABOUT ME     
+    // IM NOT DONE DONT FORGET ABOUT ME     
   }
   catch (err) {
     res.status(400).json(err);

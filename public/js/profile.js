@@ -1,4 +1,4 @@
-const playgame = async (event) => {
+const startGame = async (event) => {
   event.preventDefault();
 
   const response = await fetch('/api/games/', {
@@ -7,12 +7,22 @@ const playgame = async (event) => {
   });
 
   if (response.ok) {
-    document.location.replace('/game');
+    document.location.replace('/game/setup');
   } else {
     alert(response.statusText);
   } 
-  
 };
+
+const joinGame = (event) => {
+  event.preventDefault();
+  document.location.replace('/join');
+};
+
+
 document
   .querySelector('.play-game')
-  .addEventListener('click', playgame);
+  .addEventListener('click', startGame);
+
+document
+  .querySelector('.join-game')
+  .addEventListener('click', joinGame);
