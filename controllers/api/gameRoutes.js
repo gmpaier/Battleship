@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { Op } = require("sequelize")
-const { User, Game, Board, Ship, Chat } = require('../../models');
+const { User, Game, Board, Ship, Chat, Shot } = require('../../models');
 const { sequelize } = require('../../models/Game');
 const withAuth = require('../../utils/auth');
 
@@ -35,14 +35,17 @@ router.get("/active", withAuth, async (req, res) => {
 router.get("/play", withAuth, async (req, res) => {
   try {
     const game = await Game.findByPk(req.session.game_id);
-    const boards = await game.getBoards();
+    const boardData = await game.getBoards();
+    const boards = boardData.map((board) => board.get({ plain: true }))
     console.log(boards);
+    
     if (boards.length < 2){
       res.json({ message: "no"});
     }
     const allSet = boards.every((board) => {
       return board.set === true;
     });
+    
     if (allSet === true) {
       res.json({ message: "yes"});
     }
@@ -51,7 +54,7 @@ router.get("/play", withAuth, async (req, res) => {
     }
   }
   catch (err) {
-    res.status(400).json(err);
+    throw err;
   }
 })
 
@@ -77,6 +80,43 @@ router.get("/status", withAuth, async (req, res) => {
     });
     const opBoard = opBoardData.get({ plain: true });
 
+    const myShipData = await Ship.findAll({
+      where: {
+        board_id: myBoard.id
+      }
+    })
+    const myShips = myShipData.map((ship) => ship.get({ plain: true}));
+
+    const opShipData = await Ship.findAll({
+      board_id: opBoard.id,
+      alive: false
+    });
+    const opShips = opShipData.map((ship) => ship.get({ plain: true }))
+
+    const myShotData = await Shot.findAll({
+      where: {
+        board_id: opBoard.id
+      }
+    });
+    const myShots = myShotData.map((shot) => shot.get({ plain: true }));
+
+    const opShotData = await Shot.findAll({
+      where: {
+        board_id: myBoard.id
+      }
+    });
+    const opShots = opShotData.map((shot) => shot.get({ plain: true }));
+
+    let player_id;
+    if (game.id_one === req.session.user_id){
+      player_id = 1;
+    }
+    else {
+      player_id = 2;
+    }
+
+    res.json({game: game, player_id: player_id, myBoard: myBoard, opBoard: opBoard, myShips: myShips, opShips: opShips, myShots: myShots, opShots: opShots });
+
   }
   catch (err) {
     res.status(400).json(err);
@@ -92,6 +132,7 @@ router.post("/", withAuth, async (req, res) => {
     const newGame = newGameData.get({ plain: true });
     await Board.create({game_id: newGame.id, user_id: user.id}, {fields: ['game_id', 'user_id']});
     req.session.game_id = newGame.id;
+    console.log(req.session);
     return res.status(200).json(newGame);
   }
   catch (err) {
@@ -141,21 +182,27 @@ router.post("/join", withAuth, async (req, res) => {
 //post ships to board
 router.post("/ships", withAuth, async (req, res) => {
   try {
-    const board = await Board.findAll({
+    const boardData = await Board.findOne({
       where: {
         user_id: req.session.user_id,
         game_id: req.session.game_id
       }
     });
-    const hasShips = await sequelize.query(`SELECT COUNT(Ship.id) FROM Board JOIN Ship on Board.id = Ship.board_id WHERE Board.id=${board.id}`);
-    if (hasShips) {
+    const board = boardData.get({ plain:true });
+    console.log(board);
+    const hasShips = await boardData.getShips()
+    console.log(hasShips);
+    if (hasShips.length !== 0) {
       res.status(400).json({ message: 'There are already ships associated with this board!'});
       return;
     }
     const ships = [];
+    console.log(req.body.ships);
     req.body.ships.forEach( async (ship) => {
       ship.board_id = board.id;
-      const newShip = await Ship.create(ship);
+      ship.position = JSON.stringify(ship.position);
+      ship.hits = JSON.stringify(ship.hits);
+      const newShip = await Ship.create(ship, {fields: ['name', 'position', 'hits', 'board_id']});
       ships.push(newShip);
     });
     await Board.update({set: true}, {
@@ -206,14 +253,8 @@ router.post('/start', withAuth, async (req, res) => {
 //post move to board
 router.post("/shot", withAuth, async (req, res) => {
   try {
-    const board = await Board.findAll({
-      where: {
-        user_id: {
-          [Op.ne]: req.session.user_id
-        },
-        game_id: req.session.game_id
-      }
-    });
+    const boardData = Board.findByPk(req.body.board_id);
+    const board = boardData.get({ plain: true })
     // IM NOT DONE DONT FORGET ABOUT ME     
   }
   catch (err) {

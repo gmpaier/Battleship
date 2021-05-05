@@ -1,5 +1,6 @@
 async function joinGame() {
   let idData = $(this).attr("value")
+  console.log(idData);
   let game_id = JSON.parse(idData);
 
   const response = await fetch('/api/games/join', {

@@ -1,5 +1,5 @@
 const router = require('express').Router();
-
+const { Op } = require("sequelize")
 const {  User, Game } = require('../models');
 const withAuth = require('../utils/auth');
 
@@ -16,10 +16,7 @@ router.get('/', (req, res) => {
 // Use withAuth middleware to prevent access to route
 router.get('/game/setup', withAuth, async (req, res) => {
   try {
-    const login = {
-      logged_in: true
-    };
-    res.render('game', login);
+    res.render('game', {logged_in: true});
   } catch (err) {
     res.status(500).json(err);
   }
@@ -52,6 +49,7 @@ router.get('/profile', withAuth, async (req, res) => {
 
 router.get('/join', withAuth, async (req, res) => {
   try {
+    console.log("you're here at least?");
     const gameData = await Game.findAll({
       where: {
         active: true,
@@ -63,7 +61,7 @@ router.get('/join', withAuth, async (req, res) => {
         }
       }
     });
-
+    console.log("gameData", gameData);
     const games = gameData.map((game) => game.get({ plain: true }));
 
     res.render('join', {games, logged_in: true})

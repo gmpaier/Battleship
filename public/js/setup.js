@@ -49,9 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function generate(ship) {
         let myShip = {
+          name: ship.name,
           position: [],
           hits: []
-        };
+        }
         let randomDirection = Math.floor(Math.random() * 2);
         let randomStart = Math.floor(Math.random() * (width - ship.coord.length));
         let otherRandom = Math.floor(Math.random() * width)
@@ -120,14 +121,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getPlay () {
       let interval = setInterval(async function () {
-        const response = await fetch('/api/games/play', {
+        const responseData = await fetch('/api/games/play', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json'  },
         });
+        const response = await responseData.json();
         console.log(response);
+        console.log(response.message);
         if (response.message === "yes") {
           clearInterval(interval);
-          document.location.replace('/game/play');
+          async () => {
+            const response = await fetch('/api/games/start', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json'  },
+            });
+            if (response.ok){
+              document.location.replace('/game/play');
+            }
+          }
+          
         }
       }, 4000)
     }
