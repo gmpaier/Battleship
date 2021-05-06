@@ -154,3 +154,6 @@ ol, ul {
   float: left;
   flex-wrap: wrap;
 }
+.centre {
+  text-align: center;
+}

@@ -19,6 +19,10 @@ Shot.init(
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    hit: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    },
     board_id: {
       type: DataTypes.INTEGER,
       references: {

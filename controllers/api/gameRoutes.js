@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { Op } = require("sequelize")
 const { User, Game, Board, Ship, Chat, Shot } = require('../../models');
-const { sequelize } = require('../../models/Game');
+const { sequelize, update } = require('../../models/Game');
 const withAuth = require('../../utils/auth');
 
 router.get("/", withAuth, async (req, res) => {
@@ -107,6 +107,24 @@ router.get("/status", withAuth, async (req, res) => {
     });
     const opShots = opShotData.map((shot) => shot.get({ plain: true }));
 
+    const shotData = await Shot.findAll({
+      attributes: [
+        sequelize.fn('MAX', sequelize.col('id'))
+     ],
+      where: {
+        board_id: {
+          [Op.or]: [myBoard.id, opBoard.id]
+        }
+      }
+    });
+    const lastShot = shotData.get({ plain: true })
+
+    const myName = req.session.username
+
+    const opData = await User.findByPk(opBoard.user_id);
+    const opUser = opData.get({ plain: true })
+    const opName = opUser.username;
+
     let player_id;
     if (game.id_one === req.session.user_id){
       player_id = 1;
@@ -115,7 +133,7 @@ router.get("/status", withAuth, async (req, res) => {
       player_id = 2;
     }
 
-    res.json({game: game, player_id: player_id, myBoard: myBoard, opBoard: opBoard, myShips: myShips, opShips: opShips, myShots: myShots, opShots: opShots });
+    res.json({game: game, player_id: player_id, myBoard: myBoard, opBoard: opBoard, myShips: myShips, opShips: opShips, myShots: myShots, opShots: opShots, myName: myName, opName: opName, lastShot: lastShot });
 
   }
   catch (err) {
@@ -221,17 +239,7 @@ router.post('/start', withAuth, async (req, res) => {
   try {
     const gameData = await Game.findByPk(req.session.game_id);
     const game = gameData.get({ plain: true });
-    const boardData = await game.getBoards();
-    const boards =  boardData.map((board) => board.get({ plain: true }));
-    if (boards.length < 2){
-      res.status(400).json({message: "This game doesn't have two players!"})
-    }
-    const isSet = boards.every((board) => {
-      return board.set === true;
-    });
-    if (!isSet){
-      res.status(400).json({message: "Both players have not yet placed their ships!"})
-    }
+   
     if (game.start === false){
       randomTurn = Math.floor(Math.random * 2) + 1;
       await Game.update({start: true, turn: randomTurn}, {
@@ -253,9 +261,28 @@ router.post('/start', withAuth, async (req, res) => {
 //post move to board
 router.post("/shot", withAuth, async (req, res) => {
   try {
+    const newShot = req.body.shot
     const boardData = Board.findByPk(req.body.board_id);
     const board = boardData.get({ plain: true })
-    // IM NOT DONE DONT FORGET ABOUT ME     
+    const shipData = Board.getShips();
+    const ships = shipData.map((ship) => ship.get({ plain: true }));
+    let hit;
+    for (let i = 0; i < ships.length; i++){
+      for (let j = 0; j < ships[i].coord.length; j++){
+        if (ships[i].coord[j] === newShot){
+          hit = true;
+          updateId = ships[i].id;
+          // finish this :)
+          await Ship.update({where:
+          {
+            id = updateId
+          }}) 
+
+        }
+      }
+    } 
+
+    
   }
   catch (err) {
     res.status(400).json(err);
