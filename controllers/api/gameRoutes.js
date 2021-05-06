@@ -259,35 +259,35 @@ router.post('/start', withAuth, async (req, res) => {
 })
 
 //post move to board
-router.post("/shot", withAuth, async (req, res) => {
-  try {
-    const newShot = req.body.shot
-    const boardData = Board.findByPk(req.body.board_id);
-    const board = boardData.get({ plain: true })
-    const shipData = Board.getShips();
-    const ships = shipData.map((ship) => ship.get({ plain: true }));
-    let hit;
-    for (let i = 0; i < ships.length; i++){
-      for (let j = 0; j < ships[i].coord.length; j++){
-        if (ships[i].coord[j] === newShot){
-          hit = true;
-          updateId = ships[i].id;
-          // finish this :)
-          await Ship.update({where:
-          {
-            id = updateId
-          }}) 
+// router.post("/shot", withAuth, async (req, res) => {
+//   try {
+//     const newShot = req.body.shot
+//     const boardData = Board.findByPk(req.body.board_id);
+//     const board = boardData.get({ plain: true })
+//     const shipData = Board.getShips();
+//     const ships = shipData.map((ship) => ship.get({ plain: true }));
+//     let hit;
+//     for (let i = 0; i < ships.length; i++){
+//       for (let j = 0; j < ships[i].coord.length; j++){
+//         if (ships[i].coord[j] === newShot){
+//           hit = true;
+//           updateId = ships[i].id;
+//           // finish this :)
+//           await Ship.update({where:``
+//           {
+//             id = updateId
+//           }}) 
 
-        }
-      }
-    } 
+//         }
+//       }
+//     } 
 
     
-  }
-  catch (err) {
-    res.status(400).json(err);
-  }
-});
+//   }
+//   catch (err) {
+//     res.status(400).json(err);
+//   }
+// });
 
 router.post("/chat", withAuth, async (req, res) => {
   try {
