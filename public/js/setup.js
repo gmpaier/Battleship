@@ -84,6 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
               myShip.hits.push(0);
             });
           }
+          // myShip.position = JSON.stringify(myShip.position);
+          // myShip.hits = JSON.stringify(myShip.hits);         possible solution?
           placedShips.push(myShip);
         }
         else {
@@ -110,8 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({ships: placedShips}),
           headers: { 'Content-Type': 'application/json' },
         });
-    
         if (response.ok) {
+          $(".start").prop("disabled",true);
+          $(".reset").prop("disabled",true);
           getPlay();
         } else {
           alert(response.statusText);
@@ -119,29 +122,46 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    function getPlay () {
-      let interval = setInterval(async function () {
-        const responseData = await fetch('/api/games/play', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json'  },
-        });
+    async function getPlay () {
+      const responseData = await fetch('/api/games/play', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json'  },
+      });
+      if (responseData.ok) {
+        console.log("response ok")
         const response = await responseData.json();
-        console.log(response);
-        console.log(response.message);
         if (response.message === "yes") {
-          clearInterval(interval);
-          async () => {
-            const response = await fetch('/api/games/start', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json'  },
-            });
-            if (response.ok){
-              document.location.replace('/game/play');
-            }
-          }
-          
+          console.log('response says yes');
+          startGame();
         }
-      }, 4000)
+        else {
+          standBy();
+        }
+      }
+      else {
+        alert(responseData.statusText);
+      }
+    }
+
+    async function startGame() {
+      console.log("in async");
+      const response = await fetch('/api/games/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'  },
+      });
+      if (response.ok){
+        document.location.replace('/game/play');
+      }
+      else {
+        alert(responseData.statusText);
+      }
+    }
+    
+
+    function standBy () {
+      setTimeout(function () {
+        getPlay();
+      }, 3500)
     }
 
 //runtime

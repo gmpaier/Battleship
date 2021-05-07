@@ -36,79 +36,69 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function initializeMyBoard(grid, shots, ships) {
+  async function getShips() {
+    const responseData = await fetch('/api/games/ships', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json'  },
+    });
+    const response = await responseData.json();
+    let ships = response.ships
+    return initializeMyShips(mySquares, ships)
+  }
+
+  function initializeMyShips(squares, ships) {
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < width; j++){
         ships.forEach((ship) => {
-          ship.position.forEach((coord) => {
+          let position = ship.position;
+          console.log(position);
+          console.log(typeof position); //its a string 0.0
+          position.forEach((coord) => {
             if (coord[0] === i && coord[1] === j){
-              grid[i][j].classList.add(ship.name);
+              squares[i][j].classList.add(ship.name);
             }
           });         
         });
-        shots.forEach((shot) => {
-          if(shot.row === i && shot.col === j){
-            if (shot.hit === true){
-              grid[i][j].textContent = "X";
-            }
-            else {
-              grid[i][j].textContent = 'O';
-            }
-          }
-        })  
       };
     }
   }
 
-  function updateOpBoard(grid, shots, ships) {
+  function updateOpBoard(squares, shots) {
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < width; j++){
-        ships.forEach((ship) => {
-          ship.position.forEach((coord) => {
-            if (coord[0] === i && coord[1] === j){
-              if (grid[i][j].classList.contains(ship.name)){}
-              else{
-                grid[i][j].classList.add(ship.name);
+        if (shots){
+          shots.forEach((shot) => {
+            if(shot.row === i && shot.col === j){
+              if (shot.hit === true){
+                squares[i][j].textContent = "X";
               }
+              else {
+                squares[i][j].textContent = 'O';
+              }
+              let square = $(squares[i][j])
+              square.css("pointer-events", "none");
             }
-          });         
-        });
-        shots.forEach((shot) => {
-          if(shot.row === i && shot.col === j){
-            if (shot.hit === true){
-              grid[i][j].textContent = "X";
-            }
-            else {
-              grid[i][j].textContent = 'O';
-            }
-            let square = $(grid[i][j])
-            square.css("pointer-events", "none");
-          }
-        })  
+          })  
+        }
       };
     }
   }
   
-  function updateMyBoard (grid, shots) {
+  function updateMyBoard (squares, shots) {
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < width; j++){
-        ships.forEach((ship) => {
-          ship.position.forEach((coord) => {
-            if (coord[0] === i && coord[1] === j){
-              grid[i][j].classList.add(ship.name);
+        if (shots){
+          shots.forEach((shot) => {
+            if(shot.row === i && shot.col === j){
+              if (shot.hit === true){
+                squares[i][j].textContent = "X";
+              }
+              else {
+                squares[i][j].textContent = 'O';
+              }
             }
-          });         
-        });
-        shots.forEach((shot) => {
-          if(shot.row === i && shot.col === j){
-            if (shot.hit === true){
-              grid[i][j].textContent = "X";
-            }
-            else {
-              grid[i][j].textContent = 'O';
-            }
-          }
-        })  
+          })  
+        }
       };
     }
   }
@@ -124,6 +114,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function playGame () {
+    let {game, player_id, myShots, opShots, myName, opName, lastShot} = await getStatus();
+    updateMyBoard(mySquares, opShots);
+    updateOpBoard(opSquares, myShots);
+    if (lastShot){
+      statusText(lastShot);
+    }
+    if (game.winner_id){
+      for (i = 0; i < width; i++){
+        for (j=0; j< width; j++){
+          let square = $(opSquares[i][j]);
+          square.css("pointer-events", "none");
+        }
+      }  
+      if(game.winner_id === player_id){
+        $(".game-header").text(myName + " Won!");
+      }
+      else {
+        $(".game-header").text(opName = " Won!");
+      }
+      return;
+    }
     if (game.turn === player_id){
       $(".game-header").text(myName + "'s Turn")
       for (i = 0; i < width; i++){
@@ -142,53 +153,54 @@ document.addEventListener('DOMContentLoaded', () => {
       $(".game-header").text(opName + "'s Turn")
       for (i = 0; i < width; i++){
         for (j=0; j< width; j++){
-              let square = $(opSquares[i][j]);
-              square.css("pointer-events", "none");
+          let square = $(opSquares[i][j]);
+          square.css("pointer-events", "none");
         }
       }  
-      () => {
-        let interval = setInterval(async function () {
-          const responseData = await fetch('/api/games/status', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json'  },
-          });
-          const response = await responseData.json();
-          updateMyBoard(response.myBoard, response.opShots)
-          let hitOrMiss;
-          if (response.lastShot.hit === true){
-            hitOrMiss = "Hit"
-          }
-          else {
-            hitOrMiss = "Miss"
-          }
-          $('.status-text').text(hitOrMiss + "at [" + response.lastShot.row + "," + response.lastShot.col + "]");
-          if (response.game.turn === response.player_id) {
-            clearInterval(interval);
-          }
-        }, 4000)
+      standBy();
       }
+  }
+  
+  function statusText(lastShot) {
+    if (lastShot.hit === true){
+      $(".status-text").text(`Hit at [${lastShot.row},${lastShot.col}]`);
+    }
+    else {
+      $(".status-text").text(`Miss at [${lastShot.row},${lastShot.col}]`);
     }
   }
+
+  function standBy () {
+    setTimeout(function () {
+      playGame();
+    }, 3500)
+  }
+
+
 
   async function postMove() {
     let coordData = $(this).attr("value")
     let coord = JSON.parse(coordData);
-    const responseData = await fetch('/api/games/shot', {
+    const response = await fetch('/api/games/shot', {
       method: 'POST',
-      body: JSON.stringify({game_id: game.id, board_id: opBoard.id, shot: coord}),
+      body: JSON.stringify({shot: coord}),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await responseData.json();
+    if (response.ok){
+      playGame();
+    }
+    else {
+      alert(response.statusText);
+    }
   }
 
 
   createMyBoard(myGrid, mySquares);
   createOpBoard(opGrid, opSquares);
-  let {game, player_id, myBoard, opBoard, myShips, opShips, myShots, opShots, myName, opName, lastShot} = getStatus();
-  initializeMyBoard(myBoard, opShots, myShips);
-  updateOpBoard(opBoard, myShots, opShips);
-  playGame(opSquares);
+  getShips();
+  playGame();
 
 
   $(document).on("click", ".op-square", postMove);
 });
+

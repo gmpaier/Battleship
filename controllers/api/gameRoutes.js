@@ -37,7 +37,6 @@ router.get("/play", withAuth, async (req, res) => {
     const game = await Game.findByPk(req.session.game_id);
     const boardData = await game.getBoards();
     const boards = boardData.map((board) => board.get({ plain: true }))
-    console.log(boards);
     
     if (boards.length < 2){
       res.json({ message: "no"});
@@ -60,8 +59,10 @@ router.get("/play", withAuth, async (req, res) => {
 
 router.get("/status", withAuth, async (req, res) => {
   try {
-    const gameData = await Game.findByPk(req.session.game_id);
-    const game = gameData.get({ plain: true });
+    let gameData;
+    let game;
+    gameData = await Game.findByPk(req.session.game_id);
+    game = gameData.get({ plain: true });
     const myBoardData = await Board.findOne({
       where: {
         game_id: game.id,
@@ -69,7 +70,7 @@ router.get("/status", withAuth, async (req, res) => {
       }
     });
     const myBoard = myBoardData.get({ plain: true });
-    
+
     const opBoardData = await Board.findOne({
       where: {
         game_id: game.id,
@@ -80,18 +81,47 @@ router.get("/status", withAuth, async (req, res) => {
     });
     const opBoard = opBoardData.get({ plain: true });
 
-    const myShipData = await Ship.findAll({
-      where: {
-        board_id: myBoard.id
-      }
-    })
-    const myShips = myShipData.map((ship) => ship.get({ plain: true}));
-
-    const opShipData = await Ship.findAll({
-      board_id: opBoard.id,
-      alive: false
+    const opData = await User.findByPk(opBoard.user_id);
+    const opUser = opData.get({ plain: true })
+    console.log(myBoard);
+    const myShipData = Ship.findAll({where: {
+      board_id: myBoard.id
+    }});
+    console.log(myShipData);  //you're here, myShip data is a promise pending
+    const myShips = myShipData.map((ship) => ship.get({ plain: true }));
+    console.log("through my ships");
+    const myDead = myShips.every((ship) => {
+      return ship.alive === false;
     });
-    const opShips = opShipData.map((ship) => ship.get({ plain: true }))
+
+    if (myDead){
+      await Game.update({winner_id: opUser.id, active: false}, {where: {
+        id: req.session.game_id
+      }});
+      gameData = await Game.findByPk(req.session.game_id);
+      game = gameData.get({ plain: true })
+    }
+
+    console.log("through myDead");
+
+    const opShipData = Ship.findAll({where: {
+      board_id: opBoard.id
+    }});
+    const opShips = opShipData.map((ship) => ship.get({ plain: true }));
+
+    const opDead = opShips.every((ship) => {
+      return ship.alive === false;
+    });
+
+    if (opDead){
+      await Game.update({winner_id: req.session.user_id, active: false}, {where: {
+        id: req.session.game_id
+      }});
+      gameData = await Game.findByPk(req.session.game_id);
+      game = gameData.get({ plain: true })
+    }
+
+    console.log("through opDead");
 
     const myShotData = await Shot.findAll({
       where: {
@@ -107,7 +137,7 @@ router.get("/status", withAuth, async (req, res) => {
     });
     const opShots = opShotData.map((shot) => shot.get({ plain: true }));
 
-    const shotData = await Shot.findAll({
+    const lastShotData = await Shot.findAll({
       attributes: [
         sequelize.fn('MAX', sequelize.col('id'))
      ],
@@ -117,12 +147,13 @@ router.get("/status", withAuth, async (req, res) => {
         }
       }
     });
-    const lastShot = shotData.get({ plain: true })
 
-    const myName = req.session.username
+    let lastShot;
+    if (lastShotData){
+      lastShot = lastShotData.get({ plain: true })
+    }
 
-    const opData = await User.findByPk(opBoard.user_id);
-    const opUser = opData.get({ plain: true })
+    console.log("through lastShot");
     const opName = opUser.username;
 
     let player_id;
@@ -133,8 +164,27 @@ router.get("/status", withAuth, async (req, res) => {
       player_id = 2;
     }
 
-    res.json({game: game, player_id: player_id, myBoard: myBoard, opBoard: opBoard, myShips: myShips, opShips: opShips, myShots: myShots, opShots: opShots, myName: myName, opName: opName, lastShot: lastShot });
+    res.json({game: game, player_id: player_id, myShots: myShots, opShots: opShots, myName: req.session.username, opName: opName, lastShot: lastShot });
 
+  }
+  catch (err) {
+    res.status(400).json(err);
+  }
+});
+
+router.get("/ships", withAuth, async (req, res) => {
+  try {
+    const boardData = await Board.findOne({
+      where: {
+        user_id: req.session.user_id,
+        game_id: req.session.game_id
+      }
+    });
+    const shipData = await boardData.getShips()
+    console.log("/ships " + shipData);
+    const ships = shipData.map((ship) => ship.get({ plain: true}));
+    console.log("/ships " + ships);
+    res.json({ships: ships});
   }
   catch (err) {
     res.status(400).json(err);
@@ -237,6 +287,7 @@ router.post("/ships", withAuth, async (req, res) => {
 
 router.post('/start', withAuth, async (req, res) => {
   try {
+    console.log("in post start");
     const gameData = await Game.findByPk(req.session.game_id);
     const game = gameData.get({ plain: true });
    
@@ -247,10 +298,10 @@ router.post('/start', withAuth, async (req, res) => {
           id: game.id
         }
       });
-      res.json({message: "Begin game"});
+      res.status(200).json({message: "Begin game"});
     }
     else {
-      res.json({message: "Begin game"});
+      res.status(200).json({message: "Begin game"});
     }
   }
   catch (err) {
@@ -259,35 +310,69 @@ router.post('/start', withAuth, async (req, res) => {
 })
 
 //post move to board
-// router.post("/shot", withAuth, async (req, res) => {
-//   try {
-//     const newShot = req.body.shot
-//     const boardData = Board.findByPk(req.body.board_id);
-//     const board = boardData.get({ plain: true })
-//     const shipData = Board.getShips();
-//     const ships = shipData.map((ship) => ship.get({ plain: true }));
-//     let hit;
-//     for (let i = 0; i < ships.length; i++){
-//       for (let j = 0; j < ships[i].coord.length; j++){
-//         if (ships[i].coord[j] === newShot){
-//           hit = true;
-//           updateId = ships[i].id;
-//           // finish this :)
-//           await Ship.update({where:``
-//           {
-//             id = updateId
-//           }}) 
-
-//         }
-//       }
-//     } 
-
-    
-//   }
-//   catch (err) {
-//     res.status(400).json(err);
-//   }
-// });
+router.post("/shot", withAuth, async (req, res) => {
+  try {
+    const gameData = await Game.findByPk(req.session.game_id);
+    const game = gameData.get({ plain: true })
+    const newShot = req.body.shot
+    console.log("newShot, " + newShot);
+    const opBoard = await Board.findOne({
+      where: {
+        game_id: req.session.game_id,
+        user_id: {
+          [Op.ne]: req.session.user_id
+        }
+      }
+    });
+    const shipData = opBoard.getShips();
+    const ships = shipData.map((ship) => {ship.get({ plain: true })});
+    let hit = false;
+    ships.forEach(async (ship) => {
+      ship.position = JSON.parse(ship.position);
+      for (let i = 0; i < ship.position.length; i++){
+        if(newShot[0] === ship.position[i][0] && newShot[1] === ship.position[i][1]){
+          hit = true;
+          const hitsArray = [];
+          for (let j = 0; j < ship.hits.length; j++){
+            if (j === i){
+              hitsArray.push(1);
+            }
+            else {
+              hitsArray.push(ship.hits[j]);
+            }
+          }
+          const hitString = JSON.stringify(hitsArray);
+          const newShipData = await Ship.update({hits: hitString}, {where: {
+            id: ship.id
+          }});
+          const newShip = newShipData.get({ plain: true });
+          const allHit = newShip.hits.every((el) => {
+            return el === 1;
+          });
+          if (allHit){
+            await Ship.update({alive: false}, {
+              where: {
+                id: ship.id
+              }
+            });
+          }
+        }
+      }
+    });
+    if (hit === false){
+      if (game.turn === 1){
+        await Game.update({turn: 2}, {where: {id: req.session.game_id}});
+      }
+      else {
+        await Game.update({turn: 1}, {where: {id: req.session.game_id}});
+      }
+    }
+    res.status(200).json(hit);
+  }
+  catch (err) {
+    res.status(400).json(err);
+  }
+});
 
 router.post("/chat", withAuth, async (req, res) => {
   try {
