@@ -18,6 +18,10 @@ const joinGame = (event) => {
   document.location.replace('/join');
 };
 
+const activeGame = (event) => {
+  event.preventDefault();
+  document.location.replace('/active');
+}
 
 document
   .querySelector('.play-game')
@@ -26,3 +30,7 @@ document
 document
   .querySelector('.join-game')
   .addEventListener('click', joinGame);
+
+document
+  .querySelector('.active-game')
+  .addEventListener('click', activeGame);

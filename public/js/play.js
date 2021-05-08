@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const opSquares = [];
   const width = 10;
 
+  let shipBoo = false;
+
   function createMyBoard(grid, squares) {
     for (let i = 0; i < width; i++) {
         const row = [];
@@ -50,10 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < width; j++){
         ships.forEach((ship) => {
-          let position = ship.position;
-          console.log(position);
-          console.log(typeof position); //its a string 0.0
+          let positionData = JSON.parse(ship.position);
+          let position = JSON.parse(positionData);
           position.forEach((coord) => {
+            coord = JSON.parse(coord);
             if (coord[0] === i && coord[1] === j){
               squares[i][j].classList.add(ship.name);
             }
@@ -70,10 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
           shots.forEach((shot) => {
             if(shot.row === i && shot.col === j){
               if (shot.hit === true){
-                squares[i][j].textContent = "X";
+                squares[i][j].textContent = "O";
               }
               else {
-                squares[i][j].textContent = 'O';
+                squares[i][j].textContent = 'X';
               }
               let square = $(squares[i][j])
               square.css("pointer-events", "none");
@@ -91,10 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
           shots.forEach((shot) => {
             if(shot.row === i && shot.col === j){
               if (shot.hit === true){
-                squares[i][j].textContent = "X";
+                squares[i][j].textContent = "O";
               }
               else {
-                squares[i][j].textContent = 'O';
+                squares[i][j].textContent = 'X';
               }
             }
           })  
@@ -118,7 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateMyBoard(mySquares, opShots);
     updateOpBoard(opSquares, myShots);
     if (lastShot){
-      statusText(lastShot);
+      if (lastShot.hit){
+        statusText(lastShot);
+      }
     }
     if (game.winner_id){
       for (i = 0; i < width; i++){
@@ -139,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $(".game-header").text(myName + "'s Turn")
       for (i = 0; i < width; i++){
         for (j=0; j< width; j++){
-          shots.forEach((shot) => {
+          myShots.forEach((shot) => {
             if(shot.row === i && shot.col === j){}
             else {
               let square = $(opSquares[i][j]);
@@ -168,6 +172,17 @@ document.addEventListener('DOMContentLoaded', () => {
     else {
       $(".status-text").text(`Miss at [${lastShot.row},${lastShot.col}]`);
     }
+    if (shipBoo === false){
+      $(".status-ship").text("");
+    }
+    else {
+      shipBoo = false;
+    }
+  }
+
+  function statusShip(name) {
+    shipBoo = true;
+    $(".status-ship").text(`Enemy ${name} destroyed!`);
   }
 
   function standBy () {
@@ -176,21 +191,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3500)
   }
 
-
-
   async function postMove() {
     let coordData = $(this).attr("value")
     let coord = JSON.parse(coordData);
-    const response = await fetch('/api/games/shot', {
+    const responseData = await fetch('/api/games/shot', {
       method: 'POST',
       body: JSON.stringify({shot: coord}),
       headers: { 'Content-Type': 'application/json' },
     });
-    if (response.ok){
+    console.log(responseData);
+    if (responseData.ok){
+      let response = await responseData.json()
+      if (response.name){
+        statusShip(response.name);
+      }
       playGame();
     }
     else {
-      alert(response.statusText);
+      alert(responseData.statusText);
     }
   }
 

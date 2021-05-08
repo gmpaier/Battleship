@@ -49,7 +49,6 @@ router.get('/profile', withAuth, async (req, res) => {
 
 router.get('/join', withAuth, async (req, res) => {
   try {
-    console.log("you're here at least?");
     const gameData = await Game.findAll({
       where: {
         active: true,
@@ -65,6 +64,28 @@ router.get('/join', withAuth, async (req, res) => {
     const games = gameData.map((game) => game.get({ plain: true }));
 
     res.render('join', {games, logged_in: true})
+  }
+  catch (err) {
+    res.status(500).json(err);
+  }
+})
+
+router.get('/active', withAuth, async (req, res) => {
+  try {
+
+    const gameData = await Game.findAll({where: 
+      {
+        [Op.or]: [
+          {id_one: req.session.user_id},
+          {id_two: req.session.user_id}
+        ],
+        active: true
+      }
+    });
+
+    const games = gameData.map((game) => game.get({ plain: true }));
+
+    res.render('active', {games, logged_in: true})
   }
   catch (err) {
     res.status(500).json(err);

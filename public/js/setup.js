@@ -47,6 +47,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    async function hasShips() {
+      const responseData = await fetch('/api/games/set', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json'  },
+      });
+      if (responseData.ok) {
+        const response = await responseData.json();
+        console.log(response);
+        if (response.set === true){
+          $("#start").prop("disabled",true);
+          $("#reset").prop("disabled",true);
+          getPlay();
+        }
+        else {
+          shipsArray.forEach((ship) => {
+            generate(ship);
+          });
+        }
+      }
+    }
+
     function generate(ship) {
         let myShip = {
           name: ship.name,
@@ -71,7 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
               mySquares[otherRandom][randomStart + index].classList.add('reserved', ship.name);
               console.log(mySquares[otherRandom][randomStart + index]);
               let coord = JSON.parse(mySquares[otherRandom][randomStart + index].getAttribute('value'));
-              myShip.position.push(coord);
+              let str_coord = JSON.stringify(coord);
+              myShip.position.push(str_coord);
               myShip.hits.push(0);
             });
           }
@@ -80,12 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
               mySquares[randomStart + index][otherRandom].classList.add('reserved', ship.name);
               console.log(mySquares[randomStart + index][otherRandom]);
               let coord = JSON.parse(mySquares[randomStart + index][otherRandom].getAttribute('value'));
-              myShip.position.push(coord);
+              let str_coord = JSON.stringify(coord);
+              myShip.position.push(str_coord);
               myShip.hits.push(0);
             });
           }
-          // myShip.position = JSON.stringify(myShip.position);
-          // myShip.hits = JSON.stringify(myShip.hits);         possible solution?
+          myShip.position = JSON.stringify(myShip.position);
           placedShips.push(myShip);
         }
         else {
@@ -113,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
         });
         if (response.ok) {
-          $(".start").prop("disabled",true);
-          $(".reset").prop("disabled",true);
+          $("#start").prop("disabled",true);
+          $("#reset").prop("disabled",true);
           getPlay();
         } else {
           alert(response.statusText);
@@ -128,10 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json'  },
       });
       if (responseData.ok) {
-        console.log("response ok")
         const response = await responseData.json();
         if (response.message === "yes") {
-          console.log('response says yes');
           startGame();
         }
         else {
@@ -168,9 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createBoard(myGrid, mySquares);
     createBoard(opGrid, opSquares);
 
-    shipsArray.forEach((ship) => {
-      generate(ship);
-    })
+    hasShips();
 
     $(document).on("click", "#reset", resetShips);
     $(document).on("click", "#start", postShips)

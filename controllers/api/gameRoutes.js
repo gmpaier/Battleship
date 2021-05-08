@@ -59,10 +59,8 @@ router.get("/play", withAuth, async (req, res) => {
 
 router.get("/status", withAuth, async (req, res) => {
   try {
-    let gameData;
-    let game;
-    gameData = await Game.findByPk(req.session.game_id);
-    game = gameData.get({ plain: true });
+    let gameData = await Game.findByPk(req.session.game_id);
+    let game = gameData.get({ plain: true });
     const myBoardData = await Board.findOne({
       where: {
         game_id: game.id,
@@ -70,7 +68,6 @@ router.get("/status", withAuth, async (req, res) => {
       }
     });
     const myBoard = myBoardData.get({ plain: true });
-
     const opBoardData = await Board.findOne({
       where: {
         game_id: game.id,
@@ -83,45 +80,6 @@ router.get("/status", withAuth, async (req, res) => {
 
     const opData = await User.findByPk(opBoard.user_id);
     const opUser = opData.get({ plain: true })
-    console.log(myBoard);
-    const myShipData = Ship.findAll({where: {
-      board_id: myBoard.id
-    }});
-    console.log(myShipData);  //you're here, myShip data is a promise pending
-    const myShips = myShipData.map((ship) => ship.get({ plain: true }));
-    console.log("through my ships");
-    const myDead = myShips.every((ship) => {
-      return ship.alive === false;
-    });
-
-    if (myDead){
-      await Game.update({winner_id: opUser.id, active: false}, {where: {
-        id: req.session.game_id
-      }});
-      gameData = await Game.findByPk(req.session.game_id);
-      game = gameData.get({ plain: true })
-    }
-
-    console.log("through myDead");
-
-    const opShipData = Ship.findAll({where: {
-      board_id: opBoard.id
-    }});
-    const opShips = opShipData.map((ship) => ship.get({ plain: true }));
-
-    const opDead = opShips.every((ship) => {
-      return ship.alive === false;
-    });
-
-    if (opDead){
-      await Game.update({winner_id: req.session.user_id, active: false}, {where: {
-        id: req.session.game_id
-      }});
-      gameData = await Game.findByPk(req.session.game_id);
-      game = gameData.get({ plain: true })
-    }
-
-    console.log("through opDead");
 
     const myShotData = await Shot.findAll({
       where: {
@@ -137,23 +95,22 @@ router.get("/status", withAuth, async (req, res) => {
     });
     const opShots = opShotData.map((shot) => shot.get({ plain: true }));
 
-    const lastShotData = await Shot.findAll({
+    const idData = await Shot.findOne({
       attributes: [
-        sequelize.fn('MAX', sequelize.col('id'))
+        sequelize.fn('max', sequelize.col('id'))
      ],
       where: {
         board_id: {
           [Op.or]: [myBoard.id, opBoard.id]
         }
-      }
+      },
+      raw: true
     });
-
-    let lastShot;
-    if (lastShotData){
-      lastShot = lastShotData.get({ plain: true })
-    }
-
-    console.log("through lastShot");
+;
+    const lastShotId = idData['max(`id`)'];
+    const lastShotData = await Shot.findByPk(lastShotId);
+    const lastShot = lastShotData.get({ plain:true });
+    
     const opName = opUser.username;
 
     let player_id;
@@ -172,6 +129,23 @@ router.get("/status", withAuth, async (req, res) => {
   }
 });
 
+router.get("/set", withAuth, async (req, res) => {
+  try {
+    const boardData = await Board.findOne({
+      where: {
+        user_id: req.session.user_id,
+        game_id: req.session.game_id
+      }
+    });
+    const board = boardData.get({ plain: true });
+    const set = board.set;
+    res.status(200).json({set: set});
+  }
+  catch (err) {
+    res.status(400).json(err);
+  }
+});
+
 router.get("/ships", withAuth, async (req, res) => {
   try {
     const boardData = await Board.findOne({
@@ -181,9 +155,7 @@ router.get("/ships", withAuth, async (req, res) => {
       }
     });
     const shipData = await boardData.getShips()
-    console.log("/ships " + shipData);
     const ships = shipData.map((ship) => ship.get({ plain: true}));
-    console.log("/ships " + ships);
     res.json({ships: ships});
   }
   catch (err) {
@@ -247,6 +219,28 @@ router.post("/join", withAuth, async (req, res) => {
   }
 });
 
+//allows user to return to one of their active games
+  //in conjunction with /active homeRoute
+router.post("/rejoin", withAuth, async (req, res) => {
+  try {
+    const gameData = await Game.findByPk(req.body.game_id);
+    const game = gameData.get({ plain: true });
+
+    if (!game) {
+      res.status(400).json({ message: 'No game found with this id'});
+      return;
+    }
+
+    req.session.game_id = game.id;
+
+    res.status(200).json({game: game});
+
+  }
+  catch (err) {
+    res.status(400).json(err);
+  }
+});
+
 //post ships to board
 router.post("/ships", withAuth, async (req, res) => {
   try {
@@ -287,12 +281,12 @@ router.post("/ships", withAuth, async (req, res) => {
 
 router.post('/start', withAuth, async (req, res) => {
   try {
-    console.log("in post start");
     const gameData = await Game.findByPk(req.session.game_id);
     const game = gameData.get({ plain: true });
    
     if (game.start === false){
-      randomTurn = Math.floor(Math.random * 2) + 1;
+      let randomTurn = Math.floor(Math.random() * 2) + 1;
+      console.log(randomTurn);
       await Game.update({start: true, turn: randomTurn}, {
         where: {
           id: game.id
@@ -312,11 +306,11 @@ router.post('/start', withAuth, async (req, res) => {
 //post move to board
 router.post("/shot", withAuth, async (req, res) => {
   try {
+    console.log("IN SHOT\n");
     const gameData = await Game.findByPk(req.session.game_id);
     const game = gameData.get({ plain: true })
     const newShot = req.body.shot
-    console.log("newShot, " + newShot);
-    const opBoard = await Board.findOne({
+    const opBoardData = await Board.findOne({
       where: {
         game_id: req.session.game_id,
         user_id: {
@@ -324,41 +318,70 @@ router.post("/shot", withAuth, async (req, res) => {
         }
       }
     });
-    const shipData = opBoard.getShips();
-    const ships = shipData.map((ship) => {ship.get({ plain: true })});
+    const opBoard = opBoardData.get({ plain: true });
+    const shipData = await Ship.findAll({where: {
+      board_id: opBoard.id
+    }});
+    const ships = shipData.map((ship) => {
+      const newShip = ship.get({ plain: true })
+      return newShip;
+    });
     let hit = false;
+    let name = "";
     ships.forEach(async (ship) => {
-      ship.position = JSON.parse(ship.position);
-      for (let i = 0; i < ship.position.length; i++){
-        if(newShot[0] === ship.position[i][0] && newShot[1] === ship.position[i][1]){
+      const positionData = JSON.parse(ship.position);
+      const position_str = JSON.parse(positionData);
+      const position = position_str.map((pos) => {
+        const newPos = JSON.parse(pos);
+        return newPos;
+      });
+      
+      for (let i = 0; i < position.length; i++){
+        if(newShot[0] === position[i][0] && newShot[1] === position[i][1]){
           hit = true;
+          let hits = JSON.parse(ship.hits);
           const hitsArray = [];
-          for (let j = 0; j < ship.hits.length; j++){
+          for (let j = 0; j < hits.length; j++){
             if (j === i){
               hitsArray.push(1);
             }
             else {
-              hitsArray.push(ship.hits[j]);
+              hitsArray.push(hits[j]);
             }
           }
           const hitString = JSON.stringify(hitsArray);
-          const newShipData = await Ship.update({hits: hitString}, {where: {
-            id: ship.id
-          }});
-          const newShip = newShipData.get({ plain: true });
-          const allHit = newShip.hits.every((el) => {
+          const allHit = hitsArray.every((el) => {
             return el === 1;
           });
           if (allHit){
-            await Ship.update({alive: false}, {
-              where: {
-                id: ship.id
-              }
-            });
+            name = ship.name;
+            await Ship.update({hits: hitString, alive: false}, {where: {
+              id: ship.id
+            }});
+          }
+          else {
+            await Ship.update({hits: hitString}, {where: {
+              id: ship.id
+            }});
           }
         }
       }
     });
+    const opShipData = await Ship.findAll({where: {
+      board_id: opBoard.id
+    }});
+    const opShips = opShipData.map((ship) => ship.get({ plain: true }));
+
+    const opDead = opShips.every((ship) => {
+      return ship.alive === false;
+    });
+
+    if (opDead){
+      await Game.update({winner_id: req.session.user_id, active: false}, {where: {
+        id: req.session.game_id
+      }});
+    }
+
     if (hit === false){
       if (game.turn === 1){
         await Game.update({turn: 2}, {where: {id: req.session.game_id}});
@@ -367,7 +390,8 @@ router.post("/shot", withAuth, async (req, res) => {
         await Game.update({turn: 1}, {where: {id: req.session.game_id}});
       }
     }
-    res.status(200).json(hit);
+    await Shot.create({row: newShot[0], col: newShot[1], hit: hit, board_id: opBoard.id});
+    res.status(200).json({hit: hit, name: name});
   }
   catch (err) {
     res.status(400).json(err);
