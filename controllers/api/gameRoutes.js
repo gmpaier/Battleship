@@ -374,20 +374,6 @@ router.post("/shot", withAuth, async (req, res) => {
         }
       }
     });
-    const opShipData = await Ship.findAll({where: {
-      board_id: opBoard.id
-    }});
-    const opShips = opShipData.map((ship) => ship.get({ plain: true }));
-
-    const opDead = opShips.every((ship) => {
-      return ship.alive === false;
-    });
-
-    if (opDead){
-      await Game.update({winner_id: req.session.user_id, active: false}, {where: {
-        id: req.session.game_id
-      }});
-    }
 
     if (hit === false){
       if (game.turn === 1){
@@ -399,6 +385,38 @@ router.post("/shot", withAuth, async (req, res) => {
     }
     await Shot.create({row: newShot[0], col: newShot[1], hit: hit, board_id: opBoard.id});
     res.status(200).json({hit: hit, name: name});
+  }
+  catch (err) {
+    res.status(400).json(err);
+  }
+});
+
+router.post("/isWinner", withAuth, async (req, res) => {
+  try {
+    const opBoardData = await Board.findOne({
+      where: {
+        game_id: req.session.game_id,
+        user_id: {
+          [Op.ne]: req.session.user_id
+        }
+      }
+    });
+    const opBoard = opBoardData.get({ plain: true });
+    const opShipData = await Ship.findAll({where: {
+      board_id: opBoard.id
+    }});
+    const opShips = opShipData.map((ship) => ship.get({ plain: true }));
+  
+    const opDead = opShips.every((ship) => {
+      return ship.alive === false;
+    });
+  
+    if (opDead){
+      await Game.update({winner_id: req.session.user_id, active: false}, {where: {
+        id: req.session.game_id
+      }});
+    }
+    res.status(200).json({winner: opDead});
   }
   catch (err) {
     res.status(400).json(err);

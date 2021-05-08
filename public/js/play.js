@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         $(".game-header").text(myName + " Won!");
       }
       else {
-        $(".game-header").text(opName = " Won!");
+        $(".game-header").text(opName + " Won!");
       }
       return;
     }
@@ -189,6 +189,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3500)
   }
 
+  async function isWin() {
+    const response = await fetch('/api/games/isWinner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok){
+      alert(response.statusText);
+    } 
+  }
+
   async function postMove() {
     let coordData = $(this).attr("value")
     let coord = JSON.parse(coordData);
@@ -201,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (responseData.ok){
       let response = await responseData.json()
       if (response.name){
+        isWin();
         statusShip(response.name);
       }
       playGame();
