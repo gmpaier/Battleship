@@ -106,10 +106,17 @@ router.get("/status", withAuth, async (req, res) => {
       },
       raw: true
     });
-;
+
     const lastShotId = idData['max(`id`)'];
-    const lastShotData = await Shot.findByPk(lastShotId);
-    const lastShot = lastShotData.get({ plain:true });
+    let lastShot;
+    if (lastShotId){
+      const lastShotData = await Shot.findByPk(lastShotId);
+      lastShot = lastShotData.get({ plain:true });
+    }
+    else {
+      lastShot = null;
+    }
+
     
     const opName = opUser.username;
 
