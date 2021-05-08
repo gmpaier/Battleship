@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(shot.row === i && shot.col === j){}
             else {
               let square = $(opSquares[i][j]);
-              square.css("pointer-events", "auto");
+              square.removeAttr("style");
             }
           })  
         }
