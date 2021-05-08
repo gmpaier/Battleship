@@ -1,12 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+  
   const myGrid = document.querySelector('.grid-user');
+
   const opGrid = document.querySelector('.grid-op');
 
-  const mySquares = [];
+  //grid-element arrays
+  const mySquares = []; 
   const opSquares = [];
-  const width = 10;
 
-  let shipBoo = false;
+  const width = 10; 
 
   function createMyBoard(grid, squares) {
     for (let i = 0; i < width; i++) {
@@ -170,17 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
     else {
       $(".status-text").text(`Miss at [${lastShot.row},${lastShot.col}]`);
     }
-    if (shipBoo === false){
-      $(".status-ship").text("");
-    }
-    else {
-      shipBoo = false;
-    }
   }
 
   function statusShip(name) {
-    shipBoo = true;
-    $(".status-ship").text(`Enemy ${name} destroyed!`);
+    if (name){
+      $(".status-ship").text(`Enemy ${name} destroyed!`);
+    }
+    else {
+      $(".status-ship").text("");
+    }  
   }
 
   function standBy () {
@@ -202,6 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
       let response = await responseData.json()
       if (response.name){
         statusShip(response.name);
+      }
+      else {
+        statusShip();
       }
       playGame();
     }
