@@ -120,9 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateMyBoard(mySquares, opShots);
     updateOpBoard(opSquares, myShots);
     if (lastShot){
-      if (lastShot.hit){
-        statusText(lastShot);
-      }
+      statusText(lastShot);
     }
     if (game.winner_id){
       for (i = 0; i < width; i++){
