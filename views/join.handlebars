@@ -1,0 +1,15 @@
+<div class="row">
+  <div class="col-auto">
+    <h2>Join a Game</h2>
+  </div>
+</div>
+
+<div class='container'>
+  {{#each games as |game|}}
+    <div class="row top-buffer">
+    <button type="button" class="btn btn-primary btn-lg btn-block join-game" value={{game.id}}>Game {{game.id}}</button>
+  </div>
+  {{/each}}
+</div>
+
+<script src="/js/join.js"></script>

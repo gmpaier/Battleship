@@ -11,9 +11,10 @@ Board.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    state: {
-      type: DataTypes.STRING,
-      allowNull: false
+    set: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     },
     game_id: {
       type: DataTypes.INTEGER,
@@ -22,7 +23,7 @@ Board.init(
         key: 'id'
       }
     },
-    player_id: {
+    user_id: {
       type: DataTypes.INTEGER,
       references: {
         model: 'user',
