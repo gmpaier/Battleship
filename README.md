@@ -35,7 +35,7 @@ In the future we would like to keep a database for each user with player stats, 
 Using Websockets to lessen the CPU load
 
 ## Screenshots
-![Signin/Signup Page]assets\Signup-Page.png
+![Signin/Signup Page]assets\Signup-Page.png 
 ![Profile Page]assets\Profile-Page.png
 ![Game Page]assets\Game-Page.png
 
