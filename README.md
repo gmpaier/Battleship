@@ -35,12 +35,13 @@ In the future we would like to keep a database for each user with player stats, 
 Using Websockets to lessen the CPU load
 
 ## Screenshots
-![Landing Page]
-![Results Page]
-![Recipe Page]
+![Signin/Signup Page]assets\Signup-Page.png 
+![Profile Page]assets\Profile-Page.png
+![Game Page]assets\Game-Page.png
 
 ## Deployed Links
 https://gpaier.github.io/Battleship
+https://sleepy-beach-35058.herokuapp.com/
 
 ### Contributors
 Griffin P, Priyanka, and Donald G are all contributers to this project
