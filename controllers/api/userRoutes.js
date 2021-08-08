@@ -21,7 +21,6 @@ router.post('/login', async (req, res) => {
         req.session.logged_in = true;
         req.session.username = validUsername.username
         
-        console.log(req.session);
         res.json({ user: validUsername.username, message: `Welcome ${validUsername.username}`})
     } catch (err) {
         res.status(400).json(err);
