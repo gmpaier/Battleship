@@ -30,7 +30,7 @@ There is no need to install this application, simply follow the deployed link ab
 
 When you first visit the site, you'll be prompted to either make an account or log in. Signing in will take you to the main page - here you can start a new game, join an existing game with an open slot, view your active games, or view your overall record. Upon starting or joining a new game, ships will be placed randomly on the board; hitting reset ships will place them in new random locations. Once the user is happy with the location of their ships, they can hit start game to confirm the placement. Once both users have hit start game, the game will begin. When it is your turn, simply click on a square of the opponents board (right-hand side) to take a shot. Hits are represented with *O* and misses with *X*.  
 
-![screenshot of game set up](/battleship_screenshot.png)
+![screenshot of game set-up](public/battleship_screenshot.png)
 
 ## Technical Notes
 
